@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Configuration;
 
 namespace Kentor.AuthServices.Configuration
 {
@@ -32,7 +27,7 @@ namespace Kentor.AuthServices.Configuration
         /// for an IdentityProvider, automatically check inside it if there
         /// is a single EntityDescriptor and in that case use it.
         /// </summary>
-        [ConfigurationProperty(nameof(unpackEntitiesDescriptorInIdentityProviderMetadata), IsRequired = false)]
+        [ConfigurationProperty(unpackEntitiesDescriptorInIdentityProviderMetadata, IsRequired = false)]
         public bool UnpackEntitiesDescriptorInIdentityProviderMetadata
         {
             get
@@ -42,6 +37,26 @@ namespace Kentor.AuthServices.Configuration
             set
             {
                 base[unpackEntitiesDescriptorInIdentityProviderMetadata] = value;
+            }
+        }
+
+        const string acceptOneTimeUseAssertions = nameof(acceptOneTimeUseAssertions);
+
+        /// <summary>
+        /// If a received SamlResponse is for one time use (Assertion/Conditions/OneTimeUse)
+        /// this will allow it to be used for WebSSO.
+        /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "OneTime")]
+        [ConfigurationProperty(acceptOneTimeUseAssertions, IsRequired = false, DefaultValue = false)]
+        public bool AcceptOneTimeUseAssertions
+        {
+            get
+            {
+                return (bool)base[acceptOneTimeUseAssertions];
+            }
+            set
+            {
+                base[acceptOneTimeUseAssertions] = value;
             }
         }
     }
