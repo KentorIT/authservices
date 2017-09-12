@@ -1280,6 +1280,41 @@ namespace Kentor.AuthServices.Tests.Saml2P
         }
 
         [TestMethod]
+        public void Saml2Response_GetClaims_UsingSignedAssertionsFlag_WithSingleAssertion()
+        {
+            var identity = new ClaimsIdentity(new Claim[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, "JohnDoe")
+            });
+
+            var response = new Saml2Response(new EntityId("https://idp.example.com"), SignedXmlHelper.TestCert,
+                new Uri("http://destination.example.com"), null, null, null, true, identity);
+
+            Action a = () => Saml2Response.Read(response.ToXml()).GetClaims(Options.FromConfiguration);
+            a.ShouldNotThrow();
+        }
+
+        [TestMethod]
+        public void Saml2Response_GetClaims_UsingSignedAssertionsFlag_WithMultipleAssertions()
+        {
+            var identity1 = new ClaimsIdentity(new Claim[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, "JohnDoe")
+            });
+
+            var identity2 = new ClaimsIdentity(new Claim[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, "JaneDoe")
+            });
+
+            var response = new Saml2Response(new EntityId("https://idp.example.com"), SignedXmlHelper.TestCert,
+                new Uri("http://destination.example.com"), null, null, null, true, identity1, identity2);
+
+            Action a = () => Saml2Response.Read(response.ToXml()).GetClaims(Options.FromConfiguration);
+            a.ShouldNotThrow();
+        }
+
+        [TestMethod]
         public void Saml2Response_Read_ThrowsOnIncorrectInResponseTo()
         {
             var idp = Options.FromConfiguration.IdentityProviders.Default;

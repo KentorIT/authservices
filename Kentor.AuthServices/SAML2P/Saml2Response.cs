@@ -193,11 +193,35 @@ namespace Kentor.AuthServices.Saml2P
         /// Create a response with the supplied data.
         /// </summary>
         /// <param name="issuer">Issuer of the response.</param>
+        /// <param name="signingCertificate">The certificate to use when signing
+        /// this response in XML form.</param>
+        /// <param name="destinationUrl">The destination Uri for the message</param>
+        /// <param name="inResponseTo">In response to id</param>
+        /// <param name="relayState">RelayState associated with the message.</param>
+        /// <param name="claimsIdentities">Claims identities to be included in the 
+        /// <param name="audience">Audience of the response, set as AudienceRestriction</param>
+        /// response. Each identity is translated into a separate assertion.</param>
+        public Saml2Response(
+            EntityId issuer,
+            X509Certificate2 signingCertificate,
+            Uri destinationUrl,
+            Saml2Id inResponseTo,
+            string relayState,
+            Uri audience,
+            params ClaimsIdentity[] claimsIdentities)
+            : this(issuer, signingCertificate, destinationUrl, inResponseTo, relayState, audience, false, claimsIdentities)
+        { }
+
+        /// <summary>
+        /// Create a response with the supplied data.
+        /// </summary>
+        /// <param name="issuer">Issuer of the response.</param>
         /// <param name="issuerCertificate">The certificate to use when signing
         /// this response in XML form.</param>
         /// <param name="destinationUrl">The destination Uri for the message</param>
         /// <param name="inResponseTo">In response to id</param>
         /// <param name="relayState">RelayState associated with the message.</param>
+        /// <param name="signAssertions">Should sign assertions</param>
         /// <param name="claimsIdentities">Claims identities to be included in the 
         /// <param name="audience">Audience of the response, set as AudienceRestriction</param>
         /// response. Each identity is translated into a separate assertion.</param>
@@ -208,6 +232,7 @@ namespace Kentor.AuthServices.Saml2P
             Saml2Id inResponseTo,
             string relayState,
             Uri audience,
+            bool signAssertions,
             params ClaimsIdentity[] claimsIdentities)
         {
             Issuer = issuer;
@@ -220,7 +245,10 @@ namespace Kentor.AuthServices.Saml2P
             id = new Saml2Id("id" + Guid.NewGuid().ToString("N"));
             status = Saml2StatusCode.Success;
             this.audience = audience;
+            this.signAssertions = signAssertions;
         }
+
+        readonly bool signAssertions = false;
 
         /// <summary>
         /// Certificate used to sign the message with during binding, according
@@ -309,8 +337,20 @@ namespace Kentor.AuthServices.Saml2P
 
             foreach (var ci in claimsIdentities)
             {
-                responseElement.AppendChild(xml.ReadNode(
-                    ci.ToSaml2Assertion(Issuer, audience, InResponseTo, DestinationUrl).ToXElement().CreateReader()));
+                if (signAssertions)
+                {
+                    var assertionDoc = new XmlDocument();
+                    assertionDoc.Load(ci.ToSaml2Assertion(Issuer, audience, InResponseTo, DestinationUrl).ToXElement().CreateReader());
+                    assertionDoc.Sign(SigningCertificate, true);
+
+                    var importNode = xml.ImportNode(assertionDoc.DocumentElement, true);
+                    responseElement.AppendChild(importNode);
+                }
+                else
+                {
+                    responseElement.AppendChild(xml.ReadNode(
+                        ci.ToSaml2Assertion(Issuer, audience, InResponseTo, DestinationUrl).ToXElement().CreateReader()));
+                }
             }
 
             xmlElement = xml.DocumentElement;
@@ -548,7 +588,7 @@ namespace Kentor.AuthServices.Saml2P
                 }
             }
         }
-        
+
         /// <summary>
         /// RelayState attached to the message.
         /// </summary>
