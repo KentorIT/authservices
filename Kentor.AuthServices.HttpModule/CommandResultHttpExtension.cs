@@ -124,7 +124,10 @@ namespace Kentor.AuthServices.HttpModule
                     null,
                     DateTime.UtcNow,
                     commandResult.SessionNotOnOrAfter ??
-                    CalculateSessionNotOnOrAfter());
+                    CalculateSessionNotOnOrAfter())
+                {
+                    IsPersistent = true
+                };
 
                 EnsureSessionAuthenticationModuleAvailable();
 
