@@ -479,8 +479,8 @@ namespace Kentor.AuthServices.Tests
 
             var subject = new IdentityProvider(config, Options.FromConfiguration.SPOptions);
 
-            var expectedValidUntil = DateTime.UtcNow.AddMinutes(15);
-            // Comparison on the second is more than enough if we're adding 15 minutes.
+            var expectedValidUntil = DateTime.UtcNow.AddHours(1);
+            // Comparison on the second is more than enough if we're adding 1 hour.
             subject.MetadataValidUntil.Should().BeCloseTo(expectedValidUntil, 1000);
         }
 
@@ -783,8 +783,7 @@ namespace Kentor.AuthServices.Tests
             // If a metadatalocation is set, metadata loading is automatically enabled.
             subject.LoadMetadata.Should().BeTrue();
             subject.MetadataLocation.Should().Be("http://localhost:13428/idpMetadataOtherEntityId");
-            subject.MetadataValidUntil.Should().BeCloseTo(
-                DateTime.UtcNow.Add(MetadataRefreshScheduler.DefaultMetadataCacheDuration), precision: 100);
+            subject.MetadataValidUntil.Should().BeCloseTo(DateTime.UtcNow.AddDays(1), precision: 100);
             subject.SingleSignOnServiceUrl.Should().Be("http://wrong.entityid.example.com/acs");
             subject.WantAuthnRequestsSigned.Should().Be(true, "WantAuthnRequestsSigned should have been loaded from metadata");
 

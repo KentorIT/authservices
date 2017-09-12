@@ -31,12 +31,44 @@ namespace Kentor.AuthServices.Metadata
             return delay;
         }
 
+        internal static TimeSpan CalculateMetadataCacheDuration(this ICachedMetadata metadata)
+        {
+            if (metadata.CacheDuration.HasValue)
+            {
+                return (TimeSpan)metadata.CacheDuration;
+            }
+
+            if (metadata.ValidUntil.HasValue)
+            {
+                return CalculateCacheDurationFromValidUntil(metadata.ValidUntil.Value);
+            }
+
+            return DefaultMetadataCacheDuration;
+        }
+
+        private static TimeSpan CalculateCacheDurationFromValidUntil(DateTime validUntil)
+        {
+            var timeRemaining = validUntil - DateTime.UtcNow;
+            var twoMinutes = new TimeSpan(0, 2, 0).Ticks;
+            return new TimeSpan(Math.Max(Math.Min(DefaultMetadataCacheDuration.Ticks, timeRemaining.Ticks / 4), twoMinutes));
+        }
+
         public static readonly TimeSpan DefaultMetadataCacheDuration = new TimeSpan(1, 0, 0);
 
         internal static DateTime CalculateMetadataValidUntil(this ICachedMetadata metadata)
         {
-            return metadata.ValidUntil ??
-                   DateTime.UtcNow.Add(metadata.CacheDuration ?? DefaultMetadataCacheDuration);
-        }
+            if (metadata.ValidUntil.HasValue)
+            {
+                return (DateTime)metadata.ValidUntil;
+            }
+
+            if (metadata.CacheDuration.HasValue)
+            {
+                var extendedCacheDuration = metadata.CacheDuration.Value.Ticks * 4;
+                return DateTime.UtcNow.Add(new TimeSpan(extendedCacheDuration));
+            }
+
+            return DateTime.UtcNow.AddDays(1);
+        }        
     }
 }
