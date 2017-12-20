@@ -47,6 +47,19 @@ namespace Kentor.AuthServices.Configuration
         }
 
         /// <summary>
+        /// The password of the certificate.
+        /// </summary>
+        [ConfigurationProperty("password")]
+        [ExcludeFromCodeCoverage]
+        public string Password
+        {
+            get
+            {
+                return (string)this["password"];
+            }
+        }
+
+        /// <summary>
         /// Store name to search.
         /// </summary>
         [ConfigurationProperty("storeName")]
@@ -109,8 +122,9 @@ namespace Kentor.AuthServices.Configuration
             {
                 string fileName = FileName;
                 fileName = PathHelper.MapPath(fileName);
-                
-                return new X509Certificate2(fileName, "", X509KeyStorageFlags.MachineKeySet);
+
+                var password = string.IsNullOrEmpty(Password) ? "" : Password;
+                return new X509Certificate2(fileName, password, X509KeyStorageFlags.MachineKeySet);
             }
             else
             {
