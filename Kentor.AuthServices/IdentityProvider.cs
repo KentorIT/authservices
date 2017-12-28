@@ -312,11 +312,14 @@ namespace Kentor.AuthServices
             {
                 if (spOptions.SigningServiceCertificate == null)
                 {
-                    throw new ConfigurationErrorsException(
-                        string.Format(
-                            CultureInfo.InvariantCulture,
-                            "Idp \"{0}\" is configured for signed AuthenticateRequests, but ServiceCertificates configuration contains no certificate with usage \"Signing\" or \"Both\". To resolve this issue you can a) add a service certificate with usage \"Signing\" or \"Both\" (default if not specified is \"Both\") or b) Set the AuthenticateRequestSigningBehavior configuration property to \"Never\".",
-                            EntityId.Id));
+                    string message = string.Format(
+                        CultureInfo.InvariantCulture,
+                        "Idp \"{0}\" is configured for signed AuthenticateRequests, but ServiceCertificates configuration contains no certificate with usage \"Signing\" or \"Both\". To resolve this issue you can a) add a service certificate with usage \"Signing\" or \"Both\" (default if not specified is \"Both\") or b) Set the AuthenticateRequestSigningBehavior configuration property to \"Never\".",
+                        EntityId.Id);
+
+                    spOptions.Logger?.WriteError(message, null);
+
+                    throw new ConfigurationErrorsException(message);
                 }
 
                 authnRequest.SigningCertificate = spOptions.SigningServiceCertificate;
