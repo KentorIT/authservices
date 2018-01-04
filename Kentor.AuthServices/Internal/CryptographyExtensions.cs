@@ -28,7 +28,7 @@ namespace Kentor.AuthServices.Internal
 
             var encryptedXml = new EncryptedXml();
             byte[] encryptedElement;
-            using (var symmetricAlgorithm = new RijndaelManaged())
+            using (var symmetricAlgorithm = SymmetricAlgorithm.Create())
             {
                 symmetricAlgorithm.KeySize = 256;
                 encryptedKey.CipherData = new CipherData(EncryptedXml.EncryptKey(symmetricAlgorithm.Key, (RSA)certificate.PublicKey.Key, useOaep));

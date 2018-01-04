@@ -68,3 +68,9 @@ Download the solution, or use the instance that's provided for free at http://st
 ## Protocol Classes
 The protocol handling classes are available as a public API as well, making it possible to 
 reuse some of the internals for writing your own service provider or identity provider.
+
+
+## FIPS Compliance
+The default encryption algorithm used is RijndaelManaged, while available everywhere, is not fips compliant.
+To use the the compliant AesCryptoServiceProvider, see the [FIPS Configuration](doc/FipsConfiguration.md) page for information on
+how to switch to using fips compliant algorithms.
