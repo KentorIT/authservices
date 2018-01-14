@@ -175,5 +175,6 @@ namespace Kentor.AuthServices.Tests
 
             actual.ShouldBeEquivalentTo(expected);
         }
+        
     }
 }

@@ -208,6 +208,34 @@ namespace Kentor.AuthServices.Saml2P
             Saml2Id inResponseTo,
             string relayState,
             Uri audience,
+            params ClaimsIdentity[] claimsIdentities )
+            : this( issuer, issuerCertificate, destinationUrl, inResponseTo, relayState, audience, 
+                null, claimsIdentities )
+        { }
+
+        /// <summary>
+        /// Create a response with the supplied data.
+        /// </summary>
+        /// <param name="issuer">Issuer of the response.</param>
+        /// <param name="issuerCertificate">The certificate to use when signing
+        /// this response in XML form.</param>
+        /// <param name="destinationUrl">The destination Uri for the message</param>
+        /// <param name="inResponseTo">In response to id</param>
+        /// <param name="relayState">RelayState associated with the message.</param>
+        /// <param name="sessionNotOnOrAfter">The time instant at which the session between the principal 
+        /// identified by the subject and the SAML authority issuing this statement
+        /// must be considered ended.</param>
+        /// <param name="claimsIdentities">Claims identities to be included in the 
+        /// <param name="audience">Audience of the response, set as AudienceRestriction</param>
+        /// response. Each identity is translated into a separate assertion.</param>
+        public Saml2Response(
+            EntityId issuer,
+            X509Certificate2 issuerCertificate,
+            Uri destinationUrl,
+            Saml2Id inResponseTo,
+            string relayState,
+            Uri audience,
+            DateTime? sessionNotOnOrAfter,
             params ClaimsIdentity[] claimsIdentities)
         {
             Issuer = issuer;
@@ -220,6 +248,7 @@ namespace Kentor.AuthServices.Saml2P
             id = new Saml2Id("id" + Guid.NewGuid().ToString("N"));
             status = Saml2StatusCode.Success;
             this.audience = audience;
+            this.sessionNotOnOrAfter = sessionNotOnOrAfter;
         }
 
         /// <summary>
@@ -310,7 +339,7 @@ namespace Kentor.AuthServices.Saml2P
             foreach (var ci in claimsIdentities)
             {
                 responseElement.AppendChild(xml.ReadNode(
-                    ci.ToSaml2Assertion(Issuer, audience, InResponseTo, DestinationUrl).ToXElement().CreateReader()));
+                    ci.ToSaml2Assertion(Issuer, audience, InResponseTo, DestinationUrl,SessionNotOnOrAfter).ToXElement().CreateReader()));
             }
 
             xmlElement = xml.DocumentElement;

@@ -138,12 +138,56 @@ namespace Kentor.AuthServices.Tests
         }
 
         [TestMethod]
-        public void ClaimsIdentitExtensions_ToSaml2NameIdentifier_Nullcheck()
+        public void ClaimsIdentityExtensions_ToSaml2Assertion_Includes_DestinationUri()
+        {
+            var ci = new ClaimsIdentity(new Claim[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, "JohnDoe"  )
+            });
+
+            var audience = "http://sp.example.com/";
+
+            var destinationUri = new Uri("http://destination.example.com");
+
+            var a = ci.ToSaml2Assertion(new EntityId("http://idp.example.com"),
+                new Uri(audience),
+                null,
+                destinationUri);
+
+            a.Subject.SubjectConfirmations.Single().SubjectConfirmationData.Recipient.Should().Be(destinationUri);
+        }
+
+        [TestMethod]
+        public void ClaimsIdentityExtensions_ToSaml2Assertion_Includes_InResponseTo()
+        {
+            var ci = new ClaimsIdentity(new Claim[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, "JohnDoe"  )
+            });
+
+            var audience = "http://sp.example.com/";
+
+            var inResponseTo = new Saml2Id("InResponseTo");
+
+            var destinationUri = new Uri("http://destination.example.com");
+
+            var a = ci.ToSaml2Assertion(new EntityId("http://idp.example.com"),
+                new Uri(audience),
+                inResponseTo,
+                destinationUri);
+
+            a.Subject.SubjectConfirmations.Single().SubjectConfirmationData.InResponseTo.Value.Should().Be(inResponseTo.Value);
+        }
+
+        [TestMethod]
+        public void ClaimsIdentityExtensions_ToSaml2NameIdentifier_Nullcheck()
         {
             Action a = () => ((ClaimsIdentity)null).ToSaml2NameIdentifier();
 
             a.ShouldThrow<ArgumentNullException>()
                 .And.ParamName.Should().Be("identity");
         }
+
+       
     }
 }

@@ -1911,6 +1911,62 @@ namespace Kentor.AuthServices.Tests.Saml2P
         }
 
         [TestMethod]
+        public void Saml2Response_Xml_FromData_ContainsAuthnStatement()
+        {
+            var identity = new ClaimsIdentity(new Claim[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, "JohnDoe")
+            });
+
+            var audience = "http://sp.example.com";
+
+            var sessionNotOnOrAfter = DateTime.UtcNow;
+
+            var subject = new Saml2Response(
+                new EntityId("issuer"),
+                null,
+                new Uri("http://destination.example.com"),
+                new Saml2Id("InResponseToID"),
+                null,
+                new Uri(audience),
+                sessionNotOnOrAfter,
+                identity);
+
+            var actual = subject.XmlElement;
+
+            actual["Assertion", Saml2Namespaces.Saml2Name].Should().NotBeNull( "Assertion element should be present" )
+                .And.Subject["AuthnStatement", Saml2Namespaces.Saml2Name].Should().NotBeNull("AuthnStatement element should be present")
+                .And.Subject.Attributes["SessionNotOnOrAfter"].Value.Should().Be(sessionNotOnOrAfter.ToSaml2DateTimeString());
+
+        }
+
+        [TestMethod]
+        public void Saml2Response_FromData_Contains_SessionNotOnOrAfter()
+        {
+            var identity = new ClaimsIdentity(new Claim[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, "JohnDoe")
+            });
+
+            var audience = "http://sp.example.com";
+
+            var sessionNotOnOrAfter = DateTime.UtcNow;
+
+            var subject = new Saml2Response(
+                new EntityId("issuer"),
+                null,
+                new Uri("http://destination.example.com"),
+                new Saml2Id("InResponseToID"),
+                null,
+                new Uri(audience),
+                sessionNotOnOrAfter,
+                identity);
+
+            subject.SessionNotOnOrAfter.Should().Be( sessionNotOnOrAfter );
+
+        }
+
+        [TestMethod]
         public void Saml2Response_FromData_RelayState()
         {
             var subject = new Saml2Response(new EntityId("issuer"), null, null, null, "ABC123");

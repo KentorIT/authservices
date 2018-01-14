@@ -31,6 +31,22 @@ namespace Kentor.AuthServices.Tests
                 .And.Message.Should().Be("Statement of type StubSaml2Statement is not supported.");
         }
 
+        [TestMethod]
+        public void Saml2StatementExtensions_ToXElement_SessionNotOnOrAfter()
+        {
+            Saml2AuthenticationStatement assertion = 
+                new Saml2AuthenticationStatement(
+                    new Saml2AuthenticationContext(
+                        new Uri("urn:oasis:names:tc:SAML:2.0:ac:classes:unspecified")));
+
+            assertion.SessionNotOnOrAfter = DateTime.UtcNow;
+
+            var xml = assertion.ToXElement();
+
+            xml.Attribute("SessionNotOnOrAfter").Value.Should().Be( assertion.SessionNotOnOrAfter.Value.ToSaml2DateTimeString() );
+
+        }
+
         private class StubSaml2Statement : Saml2Statement
         {
         }

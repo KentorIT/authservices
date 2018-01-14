@@ -54,6 +54,12 @@ namespace Kentor.AuthServices
                 result.Add(new XAttribute("SessionIndex", authnStatement.SessionIndex));
             }
 
+            if( authnStatement.SessionNotOnOrAfter != null )
+            {
+                result.Add(new XAttribute("SessionNotOnOrAfter", 
+                    authnStatement.SessionNotOnOrAfter.Value.ToSaml2DateTimeString()));
+            }
+
             return result;
         }
 
