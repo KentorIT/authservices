@@ -407,6 +407,31 @@ namespace Kentor.AuthServices.Tests.Saml2P
             subject.Should().BeNull();
         }
 
+        [TestMethod]
+        public void Saml2AuthenticationRequest_ToXElement_ShouldCorrectSerializeAcsUri()
+        {
+            var url = "http://some.example.com/Saml2AuthenticationModule/acs?RelayState=https%3A%2F%2Fmy.relaystate.nl";
+            var subject = new Saml2AuthenticationRequest()
+                              {
+                                  AssertionConsumerServiceUrl = new Uri(url)
+                              }.ToXElement();
+
+            subject.Should().NotBeNull().And.Subject.Attribute("AssertionConsumerServiceURL")
+                .Should().NotBeNull().And.Subject.Value.Should().Be(url);
+        }
+
+        [TestMethod]
+        public void Saml2AuthenticationRequest_ToXElement_ShouldHandleNullAcsUri()
+        {
+            var subject = new Saml2AuthenticationRequest()
+                              {
+                                  AssertionConsumerServiceUrl = null
+                              }.ToXElement();
+
+            subject.Should().NotBeNull().And.Subject.Attribute("AssertionConsumerServiceURL")
+                .Should().BeNull();
+        }
+
         private void Saml2AuthenticationRequest_ToXElement_AddsRequestedAuthnContextUtil(AuthnContextComparisonType comparisonType, string expectedComparisonType)
         {
             var classRef = "http://www.kentor.se";

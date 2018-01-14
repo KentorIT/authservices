@@ -47,7 +47,7 @@ namespace Kentor.AuthServices.Saml2P
             {
                 x.AddAttributeIfNotNullOrEmpty("ProtocolBinding", Saml2Binding.Saml2BindingTypeToUri(Binding.Value));
             }
-            x.AddAttributeIfNotNullOrEmpty("AssertionConsumerServiceURL", AssertionConsumerServiceUrl);
+            x.AddAttributeIfNotNullOrEmpty("AssertionConsumerServiceURL", AssertionConsumerServiceUrl?.OriginalString);
             x.AddAttributeIfNotNullOrEmpty("AttributeConsumingServiceIndex", AttributeConsumingServiceIndex);
             if (ForceAuthentication)
             {
