@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Sustainsys.Saml2.Configuration
 {
@@ -33,6 +29,7 @@ namespace Sustainsys.Saml2.Configuration
                 configElement.UnpackEntitiesDescriptorInIdentityProviderMetadata;
             DisableLogoutStateCookie = configElement.DisableLogoutStateCookie;
             IgnoreMissingInResponseTo = configElement.IgnoreMissingInResponseTo;
+            AcceptOneTimeUseAssertions = configElement.AcceptOneTimeUseAssertions;
         }
 
         /// <summary>
@@ -71,5 +68,12 @@ namespace Sustainsys.Saml2.Configuration
         /// IgnoreMissingInResponseTo to true will always skip the check.
         /// </summary>
         public bool IgnoreMissingInResponseTo { get; set; }
+
+        /// <summary>
+        /// If a received SamlResponse is for one time use (Assertion/Conditions/OneTimeUse)
+        /// this will allow it to be used for WebSSO.
+        /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", MessageId = "OneTime")]
+        public bool AcceptOneTimeUseAssertions { get; set; }
     }
 }

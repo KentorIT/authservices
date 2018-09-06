@@ -779,6 +779,7 @@ providers.
 
 #### Attributes
 * [`unpackEntitiesDescriptorInIdentityProviderMetadata`](#unpackentitiesdescriptorinidentityprovidermetadata-attribute)
+* [`acceptOneTimeUseAssertions`](#acceptonetimeuseassertions-attribute)
 
 #### `unpackEntitiesDescriptorInIdentityProviderMetadata` Attribute
 * Optional attribute of [`unpackEntitiesDescriptorInIdentityProviderMetadata`](#unpackentitiesdescriptorinidentityprovidermetadata-attribute)*
@@ -786,6 +787,12 @@ providers.
 If an EntitiesDescriptor element is found when loading metadata for an
 IdentityProvider, automatically check inside it if there is a single
 EntityDescriptor and in that case use it.
+
+####`unpackEntitiesDescriptorInIdentityProviderMetadata` Attribute
+* Optional attribute of [`acceptOneTimeUseAssertions`](#acceptonetimeuseassertions-attribute)*
+
+If a received SamlResponse is for one time use (Assertion/Conditions/OneTimeUse)
+this will allow it to be used for WebSSO.
 
 #### `IgnoreAuthenticationContextInResponse` Attribute
 
