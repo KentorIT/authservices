@@ -6,6 +6,7 @@ using System.IdentityModel.Metadata;
 using Sustainsys.Saml2.Metadata;
 using Sustainsys.Saml2.WebSso;
 using Sustainsys.Saml2.TestHelpers;
+using Sustainsys.Saml2.Saml2P;
 
 namespace Sustainsys.Saml2.Tests.Configuration
 {

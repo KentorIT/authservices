@@ -17,6 +17,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Web.Hosting;
 using System.IdentityModel.Selectors;
 using System.IdentityModel.Tokens;
+using Sustainsys.Saml2.Saml2P;
 
 namespace SampleOwinApplication
 {
@@ -93,6 +94,7 @@ namespace SampleOwinApplication
             var spOptions = new SPOptions
             {
                 EntityId = new EntityId("http://localhost:57294/Saml2"),
+                NameIdPolicy = new Saml2NameIdPolicy(true, NameIdFormat.EmailAddress),
                 ReturnUrl = new Uri("http://localhost:57294/Account/ExternalLoginCallback"),
                 DiscoveryServiceUrl = new Uri("http://localhost:52071/DiscoveryService"),
                 Organization = organization
