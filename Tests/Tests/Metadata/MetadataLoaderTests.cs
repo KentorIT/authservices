@@ -5,6 +5,8 @@ using FluentAssertions;
 using System.Xml.Linq;
 using System.Linq;
 using Sustainsys.Saml2.Metadata;
+using System.Net;
+using System.IO;
 
 namespace Sustainsys.Saml2.Tests.Metadata
 {
@@ -12,7 +14,7 @@ namespace Sustainsys.Saml2.Tests.Metadata
     public class MetadataLoaderTests
     {
         [TestMethod]
-        public void MetadataLoader_LoadIdp()
+        public void MetadataLoader_LoadIdp_ByLocation()
         {
             var entityId = "http://localhost:13428/idpMetadata";
             var subject = MetadataLoader.LoadIdp(entityId);
@@ -21,11 +23,32 @@ namespace Sustainsys.Saml2.Tests.Metadata
         }
 
         [TestMethod]
-        public void MetadataLoader_LoadIdp_Nullcheck()
+        public void MetadataLoader_LoadIdp_ByStream()
         {
-            Action a = () => MetadataLoader.LoadIdp(null);
+            var entityId = "http://localhost:13428/idpMetadata";
+            using (var client = new WebClient())
+            using (var metadataStream = client.OpenRead(entityId))
+            {
+                var subject = MetadataLoader.LoadIdp(metadataStream);
+
+                subject.EntityId.Id.Should().Be(entityId);
+            }
+        }
+
+        [TestMethod]
+        public void MetadataLoader_LoadIdp_NullStringCheck()
+        {
+            Action a = () => MetadataLoader.LoadIdp((string)null);
 
             a.ShouldThrow<ArgumentNullException>().And.ParamName.Should().Be("metadataLocation");
+        }
+
+        [TestMethod]
+        public void MetadataLoader_LoadIdp_NullStreamCheck()
+        {
+            Action a = () => MetadataLoader.LoadIdp((Stream)null);
+
+            a.ShouldThrow<ArgumentNullException>().And.ParamName.Should().Be("metadataStream");
         }
 
         [TestMethod]
@@ -40,11 +63,19 @@ namespace Sustainsys.Saml2.Tests.Metadata
         }
 
         [TestMethod]
-        public void MetadataLoader_LoadFederation_Nullcheck()
+        public void MetadataLoader_LoadFederation_NullStringCheck()
         {
-            Action a = () => MetadataLoader.LoadFederation(null);
+            Action a = () => MetadataLoader.LoadFederation((string)null);
 
             a.ShouldThrow<ArgumentNullException>().And.ParamName.Should().Be("metadataLocation");
+        }
+
+        [TestMethod]
+        public void MetadataLoader_LoadFederation_NullStreamCheck()
+        {
+            Action a = () => MetadataLoader.LoadFederation((Stream)null);
+
+            a.ShouldThrow<ArgumentNullException>().And.ParamName.Should().Be("metadataStream");
         }
 
         [TestMethod]
@@ -65,6 +96,20 @@ namespace Sustainsys.Saml2.Tests.Metadata
             var result = MetadataLoader.LoadFederation(metadataLocation);
 
             result.ChildEntities.First().EntityId.Id.Should().Be("https://idp.maggie.bif.ost.se:9445/idp/saml");
+        }
+
+        [TestMethod]
+        public void MetadataLoader_LoadFederation_FromStream()
+        {
+            var metadataLocation = "http://localhost:13428/federationMetadata";
+
+            using (var client = new WebClient())
+            using (var metadataStream = client.OpenRead(metadataLocation))
+            {
+                var subject = MetadataLoader.LoadFederation(metadataStream);
+
+                subject.ChildEntities.First().EntityId.Id.Should().Be("http://idp.federation.example.com/metadata");
+            }
         }
 
         [TestMethod]

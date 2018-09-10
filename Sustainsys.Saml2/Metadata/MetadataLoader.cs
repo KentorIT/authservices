@@ -32,7 +32,17 @@ namespace Sustainsys.Saml2.Metadata
         {
             return LoadIdp(metadataLocation, false);
         }
-        
+
+        /// <summary>
+        /// Load and parse metadata.
+        /// </summary>
+        /// <param name="metadataStream">Stream containing metadata xml</param>
+        /// <returns>EntityDescriptor containing metadata</returns>
+        public static ExtendedEntityDescriptor LoadIdp(Stream metadataStream)
+        {
+            return LoadIdp(metadataStream, false);
+        }
+
         internal const string LoadIdpFoundEntitiesDescriptor = "Tried to load metadata for an IdentityProvider, which should be an <EntityDescriptor>, but found an <EntitiesDescriptor>. To load that metadata you should use the Federation configuration and not an IdentityProvider. You can also set the SPOptions.Compatibility.UnpackEntitiesDescriptorInIdentityProviderMetadata option to true.";
         internal const string LoadIdpUnpackingFoundMultipleEntityDescriptors = "Unpacked an EntitiesDescriptor when loading idp metadata, but found multiple EntityDescriptors.Unpacking is only supported if the metadata contains a single EntityDescriptor. Maybe you should use a Federation instead of configuring a single IdentityProvider";
 
@@ -58,14 +68,47 @@ namespace Sustainsys.Saml2.Metadata
                 throw new ArgumentNullException(nameof(metadataLocation));
             }
 
-            var result = Load(metadataLocation, null, false, null);
+            if (PathHelper.IsWebRootRelative(metadataLocation))
+            {
+                metadataLocation = PathHelper.MapPath(metadataLocation);
+            }
+
+            using (var client = new WebClient())
+            using (var metadataStream = client.OpenRead(metadataLocation))
+            {
+                return LoadIdp(metadataStream, unpackEntitiesDescriptor);
+            }
+        }
+
+        /// <summary>
+        /// Load and parse metadata.
+        /// </summary>
+        /// <param name="metadataStream">Stream containing metadata xml</param>
+        /// <param name="unpackEntitiesDescriptor">If the metadata contains
+        /// an EntitiesDescriptor, try to unpack it and return a single
+        /// EntityDescriptor inside if there is one.</param>
+        /// <returns>EntityDescriptor containing metadata</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "EntityDescriptors")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "SPOptions")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "UnpackEntitiesDescriptorInIdentityProviderMetadata")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "EntitiesDescriptor")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "EntityDescriptor")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "IdentityProvider")]
+        public static ExtendedEntityDescriptor LoadIdp(Stream metadataStream, bool unpackEntitiesDescriptor)
+        {
+            if (metadataStream == null)
+            {
+                throw new ArgumentNullException(nameof(metadataStream));
+            }
+
+            var result = Load(metadataStream, null, false, null);
 
             var entitiesDescriptor = result as ExtendedEntitiesDescriptor;
-            if(entitiesDescriptor != null)
+            if (entitiesDescriptor != null)
             {
-                if(unpackEntitiesDescriptor)
+                if (unpackEntitiesDescriptor)
                 {
-                    if(entitiesDescriptor.ChildEntities.Count > 1)
+                    if (entitiesDescriptor.ChildEntities.Count > 1)
                     {
                         throw new InvalidOperationException(LoadIdpUnpackingFoundMultipleEntityDescriptors);
                     }
@@ -80,34 +123,25 @@ namespace Sustainsys.Saml2.Metadata
         }
 
         private static MetadataBase Load(
-            string metadataLocation,
+            Stream metadataStream,
             IEnumerable<SecurityKeyIdentifierClause> signingKeys,
             bool validateCertificate,
             string minIncomingSigningAlgorithm)
         {
-            if(PathHelper.IsWebRootRelative(metadataLocation))
+            var reader = XmlDictionaryReader.CreateTextReader(
+                metadataStream,
+                XmlDictionaryReaderQuotas.Max);
+
+            if (signingKeys != null)
             {
-                metadataLocation = PathHelper.MapPath(metadataLocation);
+                reader = ValidateSignature(
+                    reader,
+                    signingKeys,
+                    validateCertificate,
+                    minIncomingSigningAlgorithm);
             }
 
-            using (var client = new WebClient())
-            using (var stream = client.OpenRead(metadataLocation))
-            {
-                var reader = XmlDictionaryReader.CreateTextReader(
-                    stream,
-                    XmlDictionaryReaderQuotas.Max);
-
-                if(signingKeys != null)
-                {
-                    reader = ValidateSignature(
-                        reader,
-                        signingKeys,
-                        validateCertificate,
-                        minIncomingSigningAlgorithm);
-                }
-
-                return Load(reader);
-            }
+            return Load(reader);
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "No unmanaged resources involved, safe to ignore")]
@@ -120,7 +154,7 @@ namespace Sustainsys.Saml2.Metadata
             var xmlDoc = XmlHelpers.CreateSafeXmlDocument();
             xmlDoc.Load(reader);
 
-            if(!xmlDoc.DocumentElement.IsSignedByAny(
+            if (!xmlDoc.DocumentElement.IsSignedByAny(
                 signingKeys,
                 validateCertificate,
                 minIncomingSigningAlgorithm))
@@ -135,7 +169,7 @@ namespace Sustainsys.Saml2.Metadata
         internal static MetadataBase Load(XmlDictionaryReader reader)
         {
             var serializer = ExtendedMetadataSerializer.ReaderInstance;
-            
+
             // Filter out the signature from the metadata, as the built in MetadataSerializer
             // doesn't handle the XmlDsigNamespaceUrl http://www.w3.org/2000/09/xmldsig# which
             // is allowed (and for SAMLv1 even recommended).
@@ -155,6 +189,16 @@ namespace Sustainsys.Saml2.Metadata
         public static ExtendedEntitiesDescriptor LoadFederation(string metadataLocation)
         {
             return LoadFederation(metadataLocation, null, false, null);
+        }
+
+        /// <summary>
+        /// Load and parse metadata for a federation.
+        /// </summary>
+        /// <param name="metadataStream">Stream containing metadata xml</param>
+        /// <returns>Extended entitiesdescriptor</returns>
+        public static ExtendedEntitiesDescriptor LoadFederation(Stream metadataStream)
+        {
+            return LoadFederation(metadataStream, null, false, null);
         }
 
         /// <summary>
@@ -183,8 +227,46 @@ namespace Sustainsys.Saml2.Metadata
                 throw new ArgumentNullException(nameof(metadataLocation));
             }
 
+            if (PathHelper.IsWebRootRelative(metadataLocation))
+            {
+                metadataLocation = PathHelper.MapPath(metadataLocation);
+            }
+
+            using (var client = new WebClient())
+            using (var metadataStream = client.OpenRead(metadataLocation))
+            {
+                return LoadFederation(metadataStream, signingKeys, validateCertificate, minIncomingSigningAlgorithm);
+            }
+        }
+
+        /// <summary>
+        /// Load and parse metadata for a federation.
+        /// </summary>
+        /// <param name="metadataStream">Stream containing metadata xml</param>
+        /// <param name="signingKeys"></param>
+        /// <param name="validateCertificate">Validate the certificate when doing
+        /// signature validation. Normally a bad idea with SAML2 as certificates
+        /// are not required to be valid but are only used as conventient carriers
+        /// for keys.</param>
+        /// <param name="minIncomingSigningAlgorithm">Mininum strength accepted
+        /// for signing algorithm.</param>
+        /// <returns>Extended entitiesdescriptor</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "EntitiesDescriptor")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "EntityDescriptor")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "IdentityProvider")]
+        public static ExtendedEntitiesDescriptor LoadFederation(
+            Stream metadataStream,
+            IEnumerable<SecurityKeyIdentifierClause> signingKeys,
+            bool validateCertificate,
+            string minIncomingSigningAlgorithm)
+        {
+            if (metadataStream == null)
+            {
+                throw new ArgumentNullException(nameof(metadataStream));
+            }
+
             var result = Load(
-                metadataLocation,
+                metadataStream,
                 signingKeys,
                 validateCertificate,
                 minIncomingSigningAlgorithm);
