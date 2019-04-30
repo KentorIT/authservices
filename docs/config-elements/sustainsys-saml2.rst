@@ -17,6 +17,16 @@ Attributes
     The SAML standard requires the entityId to be an absolute URI. Typically it should be the URL where the metadata 
     is presented. E.g. http://sp.example.com/Saml2/.
 
+``entityFormat``
+    The format used to represent the entityId. If omitted, it is assumed to be the default of ``urn:oasis:names:tc:SAML:2.0:nameid-format:entity``.
+
+	The SAML standard requires the entityFormat to be an URN. 
+
+``entityNameQualifier``
+    The scope for the entityId. If omitted the entityId will be assumed in the global scope.
+
+	The SAML standard requires the entityFormat to be an absolute URI.
+
 ``discoveryService`` (Optional)
     Specifies an idp discovery service to use if no idp is specified when calling sign in. Without 
     this attribute, the first idp known will be used if none is specified.

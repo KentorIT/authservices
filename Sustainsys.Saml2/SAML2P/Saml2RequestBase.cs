@@ -83,6 +83,16 @@ namespace Sustainsys.Saml2.Saml2P
         public EntityId Issuer { get; set; }
 
         /// <summary>
+        /// The issuer format of the request.
+        /// </summary>
+        public Uri IssuerFormat { get; set; }
+
+        /// <summary>
+        /// The issuer name qualifier of the request.
+        /// </summary>
+        public Uri IssuerNameQualifier { get; set; }
+
+        /// <summary>
         /// The SAML2 request name
         /// </summary>
         protected abstract string LocalName { get; }
@@ -107,7 +117,10 @@ namespace Sustainsys.Saml2.Saml2P
 
             if (Issuer != null && !string.IsNullOrEmpty(Issuer.Id))
             {
-                yield return new XElement(Saml2Namespaces.Saml2 + "Issuer", Issuer.Id);
+                yield return new XElement(Saml2Namespaces.Saml2 + "Issuer",
+                    IssuerFormat != null ? new XAttribute("Format", IssuerFormat): null,
+                    IssuerNameQualifier != null ? new XAttribute("NameQualifier", IssuerNameQualifier) : null,
+                    Issuer.Id);
             }
         }
 
@@ -135,6 +148,14 @@ namespace Sustainsys.Saml2.Saml2P
             if(issuerNode != null)
             {
                 Issuer = new EntityId(issuerNode.InnerXml);
+
+                var issuerFormatAttribute = issuerNode.Attributes["Format"];
+                if (issuerFormatAttribute != null)
+                    IssuerFormat = new Uri(issuerFormatAttribute.Value);
+
+                var issuerNameQualifierAttribute = issuerNode.Attributes["NameQualifier"];
+                if (issuerNameQualifierAttribute != null)
+                    IssuerNameQualifier = new Uri(issuerNameQualifierAttribute.Value);
             }
         }
 

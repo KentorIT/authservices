@@ -305,6 +305,8 @@ namespace Sustainsys.Saml2
                 DestinationUrl = SingleSignOnServiceUrl,
                 AssertionConsumerServiceUrl = saml2Urls.AssertionConsumerServiceUrl,
                 Issuer = spOptions.EntityId,
+                IssuerFormat = spOptions.EntityFormat,
+                IssuerNameQualifier = spOptions.EntityNameQualifier,
                 // For now we only support one attribute consuming service.
                 AttributeConsumingServiceIndex = spOptions.AttributeConsumingServices.Any() ? 0 : (int?)null,
                 NameIdPolicy = spOptions.NameIdPolicy,
@@ -550,6 +552,8 @@ namespace Sustainsys.Saml2
             {
                 DestinationUrl = SingleLogoutServiceUrl,
                 Issuer = spOptions.EntityId,
+                IssuerFormat = spOptions.EntityFormat,
+                IssuerNameQualifier = spOptions.EntityNameQualifier,
                 NameId = user.FindFirst(Saml2ClaimTypes.LogoutNameIdentifier)
                             .ToSaml2NameIdentifier(),
                 SessionIndex =

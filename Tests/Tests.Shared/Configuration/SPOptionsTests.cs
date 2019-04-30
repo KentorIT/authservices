@@ -75,6 +75,8 @@ namespace Sustainsys.Saml2.Tests.Configuration
             subject.ValidateCertificates.Should().Be(true);
             subject.DiscoveryServiceUrl.Should().Be(config.DiscoveryServiceUrl);
             subject.EntityId.Should().Be(config.EntityId);
+            subject.EntityFormat.Should().Be(config.EntityFormat);
+            subject.EntityNameQualifier.Should().Be(config.EntityNameQualifier);
             subject.ModulePath.Should().Be(config.ModulePath);
             subject.NameIdPolicy.AllowCreate.Should().Be(config.NameIdPolicyElement.AllowCreate);
             subject.NameIdPolicy.Format.Should().Be(config.NameIdPolicyElement.Format);

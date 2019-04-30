@@ -46,6 +46,8 @@ namespace Sustainsys.Saml2.Configuration
             ValidateCertificates = configSection.ValidateCertificates;
             DiscoveryServiceUrl = configSection.DiscoveryServiceUrl;
             EntityId = configSection.EntityId;
+            EntityFormat = configSection.EntityFormat;
+            EntityNameQualifier = configSection.EntityNameQualifier;
             ModulePath = configSection.ModulePath;
             PublicOrigin = configSection.PublicOrigin;
             Organization = configSection.Organization;
@@ -140,6 +142,50 @@ namespace Sustainsys.Saml2.Configuration
                     throw new InvalidOperationException("Can't change entity id when a token handler has been instantiated.");
                 }
                 entityId = value;
+            }
+        }
+
+        private Uri entityFormat;
+
+        /// <summary>
+        /// EntityFormat - The identity of the ServiceProvider to use when sending requests to Idp
+        /// and presenting the SP in metadata.
+        /// </summary>
+        public Uri EntityFormat
+        {
+            get
+            {
+                return entityFormat;
+            }
+            set
+            {
+                if (saml2PSecurityTokenHandler != null)
+                {
+                    throw new InvalidOperationException("Can't change entity format when a token handler has been instantiated.");
+                }
+                entityFormat = value;
+            }
+        }
+
+        private Uri entityNameQualifier;
+
+        /// <summary>
+        /// EntityFormat - The identity of the ServiceProvider to use when sending requests to Idp
+        /// and presenting the SP in metadata.
+        /// </summary>
+        public Uri EntityNameQualifier
+        {
+            get
+            {
+                return entityNameQualifier;
+            }
+            set
+            {
+                if (saml2PSecurityTokenHandler != null)
+                {
+                    throw new InvalidOperationException("Can't change entity format when a token handler has been instantiated.");
+                }
+                entityNameQualifier = value;
             }
         }
 

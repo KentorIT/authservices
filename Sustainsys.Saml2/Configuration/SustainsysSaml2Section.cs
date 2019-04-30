@@ -74,6 +74,30 @@ namespace Sustainsys.Saml2.Configuration
         }
 
         /// <summary>
+        /// The EntityId format.
+        /// </summary>
+        [ConfigurationProperty("entityFormat", IsRequired = false)]
+        public Uri EntityFormat
+        {
+            get
+            {
+                return (Uri)base["entityFormat"];
+            }
+        }
+
+        /// <summary>
+        /// The EntityId name qualifier.
+        /// </summary>
+        [ConfigurationProperty("entityNameQualifier", IsRequired = false)]
+        public Uri EntityNameQualifier
+        {
+            get
+            {
+                return (Uri)base["entityNameQualifier"];
+            }
+        }
+
+        /// <summary>
         /// The Url to redirect back to after successfull authentication.
         /// </summary>
         [ConfigurationProperty("returnUrl")]
