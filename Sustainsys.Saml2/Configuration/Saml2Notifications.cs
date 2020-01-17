@@ -150,5 +150,12 @@ namespace Sustainsys.Saml2.Configuration
         /// </summary>
         public Func<EntityId, IDictionary<string, string>, IOptions, IdentityProvider> GetIdentityProvider { get; set; }
             = (ei, rd, opt) => opt.IdentityProviders[ei];
+
+        /// <summary>
+        /// Notification called when formatting redirect URL. Default version is to return
+        /// the detected current URL from the request.
+        /// </summary>
+        public Func<Uri, Uri, Uri> RewriteRedirectUrl { get; set; }
+            = (redirectUri, publicOrigin) => redirectUri;
     }
 }

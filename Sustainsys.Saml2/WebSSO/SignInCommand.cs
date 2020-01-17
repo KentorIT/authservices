@@ -111,6 +111,10 @@ namespace Sustainsys.Saml2.WebSso
             }
 
             var urls = new Saml2Urls(request, options);
+            if (!string.IsNullOrEmpty(returnPath))
+            {
+                returnPath = options.Notifications.RewriteRedirectUrl(new Uri(returnPath, UriKind.RelativeOrAbsolute), urls.ApplicationUrl).ToString();
+            }
 
             IdentityProvider idp = options.Notifications.SelectIdentityProvider(idpEntityId, relayData);
             if (idp == null)
