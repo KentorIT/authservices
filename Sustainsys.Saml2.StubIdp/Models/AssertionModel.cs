@@ -20,7 +20,7 @@ namespace Sustainsys.Saml2.StubIdp.Models
         public string AssertionConsumerServiceUrl { get; set; }
 
         [Display(Name = "Relay State")]
-        [StringLength(80)]
+        [StringLength(1024)]
         public string RelayState { get; set; }
 
         [Display(Name = "Subject NameId")]
