@@ -13,8 +13,10 @@ namespace Sustainsys.Saml2
         /// Writes out the subject as an XElement.
         /// </summary>
         /// <param name="subject">The subject to create xml for.</param>
+        /// <param name="addBearer">Indicates if the "Bearer" type should be added.</param>
         /// <returns>XElement</returns>
-        public static XElement ToXElement(this Saml2Subject subject)
+        /// <remarks>addBearer is a workaround to skip it in an AuthnRequest.</remarks>
+        public static XElement ToXElement(this Saml2Subject subject, bool addBearer = true)
         {
             if (subject == null)
             {
@@ -29,7 +31,7 @@ namespace Sustainsys.Saml2
                 element.Add(subjectConfirmation.ToXElement());
             }
 
-            if (subject.SubjectConfirmations.Count == 0)
+            if (addBearer && (subject.SubjectConfirmations.Count == 0))
             {
                 // Although SubjectConfirmation is optional in the SAML core spec, it is
                 // mandatory in the Web Browser SSO Profile and must have a value of bearer.

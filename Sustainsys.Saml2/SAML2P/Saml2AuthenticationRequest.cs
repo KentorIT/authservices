@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
+using Microsoft.IdentityModel.Tokens.Saml2;
 using Sustainsys.Saml2.Configuration;
 using Sustainsys.Saml2.Internal;
 using Sustainsys.Saml2.WebSso;
@@ -59,6 +60,8 @@ namespace Sustainsys.Saml2.Saml2P
                 x.Add(new XAttribute("IsPassive", IsPassive));
             }
 
+            AddSubject(x);
+
             AddNameIdPolicy(x);
 
             if (RequestedAuthnContext != null && RequestedAuthnContext.ClassRef != null)
@@ -75,6 +78,14 @@ namespace Sustainsys.Saml2.Saml2P
             AddScoping(x);
 
             return x;
+        }
+
+        private void AddSubject(XElement xElement)
+        {
+            if (Subject != null)
+            {
+                xElement.Add(Subject.ToXElement(false));  // false ==> do not add the "bearer"
+            }
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "NameIdPolicy")]
@@ -172,6 +183,27 @@ namespace Sustainsys.Saml2.Saml2P
                 IsPassive = XmlConvert.ToBoolean(isPassiveString);
             }
 
+            var subjectEl = xml["Subject", Saml2Namespaces.Saml2Name];
+            if (subjectEl != null)
+            {
+                var nameIdEl = subjectEl["NameID", Saml2Namespaces.Saml2Name];
+                if ( nameIdEl != null )
+                {
+                    var fullFormat = nameIdEl.Attributes["Format"].GetValueIfNotNull();
+                    string name = nameIdEl.InnerText;
+                    Saml2NameIdentifier nameID;
+                    if (fullFormat != null)
+                        nameID = new Saml2NameIdentifier(name, new Uri(fullFormat));
+                    else
+                        nameID = new Saml2NameIdentifier(name);
+
+                    nameID.NameQualifier = nameIdEl.Attributes["NameQualifier"].GetValueIfNotNull();
+                    nameID.SPNameQualifier = nameIdEl.Attributes["SPNameQualifier"].GetValueIfNotNull();
+                    nameID.SPProvidedId = nameIdEl.Attributes["SPProvidedID"].GetValueIfNotNull();
+                    Subject = new Saml2Subject(nameID);
+                }
+            }
+
             var node = xml["NameIDPolicy", Saml2Namespaces.Saml2PName];
             if (node != null)
             {
@@ -208,6 +240,11 @@ namespace Sustainsys.Saml2.Saml2P
         /// Scoping for request 
         /// </summary> 
         public Saml2Scoping Scoping { get; set; }
+
+        /// <summary>
+        /// Subject for an AuthnRequest if a specific subject/identity/account is required.
+        /// </summary>
+        public Saml2Subject Subject { get; set; }
 
         /// <summary>
         /// NameId policy.
