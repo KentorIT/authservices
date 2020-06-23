@@ -80,6 +80,25 @@ namespace Sustainsys.Saml2.TestHelpers
             return xmlDoc.OuterXml;
         }
 
+        public static string EncryptId(string nameIdXml, bool useOaep = false, X509Certificate2 certificate = null)
+        {
+            if (certificate == null)
+            {
+                certificate = TestCert2;
+            }
+
+            var xmlDoc = XmlHelpers.CreateSafeXmlDocument();
+            var wrappedId = "<saml2:EncryptedID xmlns:saml2=\"urn:oasis:names:tc:SAML:2.0:assertion\">\r\n"
+                            + $"    {nameIdXml}\r\n"  // the whitespace in this string is an important part of the test.
+                            + "</saml2:EncryptedID>";
+            xmlDoc.LoadXml(wrappedId);
+            var elementToEncrypt = (XmlElement)xmlDoc.GetElementsByTagName("NameID", Saml2Namespaces.Saml2Name)[0];
+
+            elementToEncrypt.Encrypt(useOaep, certificate);
+
+            return xmlDoc.OuterXml;
+        }
+
         public static readonly string KeyInfoXml;
 
         public static readonly string KeyInfoXml2;

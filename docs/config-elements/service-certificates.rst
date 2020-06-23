@@ -2,8 +2,8 @@
 =================================
 This is an **optional** child element of the :doc:`sustainsys.saml2 <sustainsys-saml2>` element.
 
-Specifies the certificate(s) that the service provider uses for encrypted assertions (and for signed requests, once 
-that feature is added). If neither of those features are used, this element can be ommitted.
+Specifies the certificate(s) that the service provider uses for encrypted assertions and name identifiers (and for signed requests, once 
+that feature is added). If none of those features are used, this element can be omitted.
 
 The public key(s) will be exposed in the metadata and the private key(s) will be used during decryption/signing.
 

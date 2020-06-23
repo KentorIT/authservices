@@ -8,6 +8,7 @@ using System.Globalization;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Xml;
+using Sustainsys.Saml2.Configuration;
 using static Microsoft.IdentityModel.Logging.LogHelper;
 using EncryptingCredentials = Microsoft.IdentityModel.Tokens.EncryptingCredentials;
 
@@ -53,7 +54,7 @@ namespace Sustainsys.Saml2.Saml2P
 			this.spOptions = spOptions;
 		}
 
-		public ICollection<X509Certificate2> DecryptionCertificates { get; set; }
+		public ICollection<X509Certificate2> DecryptionCertificates => spOptions.DecryptionServiceCertificates;
 
 		/// <summary>
 		/// Reads a &lt;saml:Assertion> element.
@@ -196,6 +197,44 @@ namespace Sustainsys.Saml2.Saml2P
 
 				throw LogReadException(LogMessages.IDX13102, ex, Saml2Constants.Elements.Assertion, ex);
 			}
+		}
+
+		protected override Saml2NameIdentifier ReadEncryptedId(XmlDictionaryReader reader)
+		{
+			var encrypted = new XmlDocument(reader.NameTable);
+			encrypted.PreserveWhitespace = true;
+			encrypted.LoadXml(reader.ReadOuterXml());
+			XmlElement decrypted = null;
+			foreach (var cert in DecryptionCertificates)
+			{
+				try
+				{
+					decrypted = encrypted.DocumentElement.Decrypt(cert.PrivateKey);
+					break;
+				}
+				catch (CryptographicException)
+				{
+				}
+			}
+
+			if (decrypted == null)
+			{
+				throw new InvalidOperationException(
+					"EncryptedId could not be decrypted using any available decryption certificate");
+			}
+
+			reader = XmlDictionaryReader.CreateDictionaryReader(new XmlNodeReader(StripWrapper(decrypted)));
+			return ReadNameIdentifier(reader, null);
+		}
+
+		private static XmlNode StripWrapper(XmlElement decrypted)
+		{
+			var inner = decrypted.FirstChild;
+			while (!(inner is XmlElement) && inner != null)
+			{
+				inner = inner.NextSibling;
+			}
+			return inner;
 		}
 
 		public virtual void WriteEncryptedAssertion(XmlWriter writer, Saml2EncryptedAssertion assertion)

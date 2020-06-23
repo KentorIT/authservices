@@ -1202,7 +1202,7 @@ namespace Sustainsys.Saml2.Tests.Saml2P
             assertion.Conditions = new Saml2Conditions { NotOnOrAfter = new DateTime(2100, 1, 1) };
 
             var token = new Saml2SecurityToken(assertion);
-            var handler = new Saml2SecurityTokenHandler();
+            var handler = new Saml2PSecurityTokenHandler(Options.FromConfiguration.SPOptions);
 
 			var signingKey = new X509SecurityKey(SignedXmlHelper.TestCert);
 			var signingCreds = new SigningCredentials(signingKey,
@@ -1228,6 +1228,45 @@ namespace Sustainsys.Saml2.Tests.Saml2P
 			var claims = Saml2Response.Read(responseWithAssertion).GetClaims(Options.FromConfiguration);
             claims.Count().Should().Be(1);
             claims.First().FindFirst(ClaimTypes.NameIdentifier).Value.Should().Be("WIFUser");
+        }
+
+        [TestMethod]
+        public void Saml2Response_GetClaims_CorrectEncryptedId()
+        {
+            var response =
+            @"<saml2p:Response xmlns:saml2p=""urn:oasis:names:tc:SAML:2.0:protocol""
+            xmlns:saml2=""urn:oasis:names:tc:SAML:2.0:assertion""
+            ID = """ + MethodBase.GetCurrentMethod().Name + @""" Version=""2.0"" IssueInstant=""2013-01-01T00:00:00Z"">
+                <saml2:Issuer>https://idp.example.com</saml2:Issuer>
+                <saml2p:Status>
+                    <saml2p:StatusCode Value=""urn:oasis:names:tc:SAML:2.0:status:Success"" />
+                </saml2p:Status>
+                {0}
+            </saml2p:Response>";
+
+            var nameId = "<saml2:NameID>UserIDInsideEncryptedID</saml2:NameID>";
+            var encryptedId = SignedXmlHelper.EncryptId(nameId);
+
+            var assertion =
+                @"<saml2:Assertion Version=""2.0"" ID=""" + MethodBase.GetCurrentMethod().Name + @"_Assertion1""
+                IssueInstant=""2013-09-25T00:00:00Z"" xmlns:saml2=""urn:oasis:names:tc:SAML:2.0:assertion"">
+                    <saml2:Issuer>https://idp.example.com</saml2:Issuer>
+                    <saml2:Subject>
+                        " + encryptedId + @"
+                        <saml2:SubjectConfirmation Method=""urn:oasis:names:tc:SAML:2.0:cm:bearer"" />
+                    </saml2:Subject>
+                    <saml2:Conditions NotOnOrAfter=""2100-01-01T00:00:00Z"" />
+                </saml2:Assertion>";
+
+            var signedResponse = SignedXmlHelper.SignXml(string.Format(response, assertion));
+
+            var options = StubFactory.CreateOptions();
+            options.SPOptions.ServiceCertificates.Add(new ServiceCertificate { Certificate = SignedXmlHelper.TestCert2 });
+
+            var claims = Saml2Response.Read(signedResponse).GetClaims(options);
+            claims.Count().Should().Be(1);
+            claims.First().FindFirst(ClaimTypes.NameIdentifier).Value.Should().Be("UserIDInsideEncryptedID");
+
         }
 
         [TestMethod]
