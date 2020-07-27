@@ -615,7 +615,9 @@ namespace Sustainsys.Saml2.Saml2P
 
 				sessionNotOnOrAfter = DateTimeHelper.EarliestTime(sessionNotOnOrAfter,
 					token.Assertion.Statements.OfType<Saml2AuthenticationStatement>()
-						.SingleOrDefault()?.SessionNotOnOrAfter);
+                        .Where(x => x.SessionNotOnOrAfter.HasValue)
+                        .OrderBy(x => x.SessionNotOnOrAfter)
+						.FirstOrDefault()?.SessionNotOnOrAfter);
 
 				foreach (var identity in principal.Identities)
 				{
