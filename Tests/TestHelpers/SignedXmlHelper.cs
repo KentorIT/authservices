@@ -45,7 +45,8 @@ namespace Sustainsys.Saml2.TestHelpers
             string xml,
             bool includeKeyInfo = false,
             bool preserveWhitespace = true,
-            string signingAlgorithmName = null)
+            string signingAlgorithmName = null,
+            string canonicalizationMethod = null)
         {
             var xmlDoc = XmlHelpers.CreateSafeXmlDocument();
             xmlDoc.PreserveWhitespace = preserveWhitespace;
@@ -57,7 +58,7 @@ namespace Sustainsys.Saml2.TestHelpers
             }
             else
             {
-                xmlDoc.Sign(TestCert, includeKeyInfo, signingAlgorithmName);
+                xmlDoc.Sign(TestCert, includeKeyInfo, signingAlgorithmName, canonicalizationMethod);
             }
 
             return xmlDoc.OuterXml;

@@ -175,7 +175,31 @@ namespace Sustainsys.Saml2
                 throw new ArgumentNullException(nameof(xmlDocument));
             }
 
-            xmlDocument.DocumentElement.Sign(cert, includeKeyInfo, signingAlgorithm);
+            xmlDocument.DocumentElement.Sign(cert, includeKeyInfo, signingAlgorithm, SignedXml.XmlDsigExcC14NTransformUrl);
+        }
+
+        /// <summary>
+        /// Sign an xml document with the supplied cert.
+        /// </summary>
+        /// <param name="xmlDocument">XmlDocument to be signed. The signature is
+        /// added as a node in the document, right after the Issuer node.</param>
+        /// <param name="cert">Certificate to use when signing.</param>
+        /// <param name="includeKeyInfo">Include public key in signed output.</param>
+        /// <param name="signingAlgorithm">Uri of signing algorithm to use.</param>
+        /// <param name="canonicalizationMethod">The canonicalization to use.</param>
+        public static void Sign(
+            this XmlDocument xmlDocument,
+            X509Certificate2 cert,
+            bool includeKeyInfo,
+            string signingAlgorithm,
+            string canonicalizationMethod)
+        {
+            if (xmlDocument == null)
+            {
+                throw new ArgumentNullException(nameof(xmlDocument));
+            }
+
+            xmlDocument.DocumentElement.Sign(cert, includeKeyInfo, signingAlgorithm, canonicalizationMethod);
         }
 
         /// <summary>
@@ -208,6 +232,29 @@ namespace Sustainsys.Saml2
             {
                 throw new ArgumentNullException(nameof(xmlElement));
             }
+            xmlElement.Sign(cert, includeKeyInfo, signingAlgorithm, SignedXml.XmlDsigExcC14NTransformUrl);
+        }
+
+        /// <summary>
+        /// Sign an xml element with the supplied cert.
+        /// </summary>
+        /// <param name="xmlElement">xmlElement to be signed. The signature is
+        /// added as a node in the document, right after the Issuer node.</param>
+        /// <param name="cert">Certificate to use when signing.</param>
+        /// <param name="includeKeyInfo">Include public key in signed output.</param>
+        /// <param name="signingAlgorithm">The signing algorithm to use.</param>
+        /// <param name="canonicalizationMethod">The canonicalization to use.</param>
+        public static void Sign(
+            this XmlElement xmlElement,
+            X509Certificate2 cert,
+            bool includeKeyInfo,
+            string signingAlgorithm,
+            string canonicalizationMethod)
+        {
+            if (xmlElement == null)
+            {
+                throw new ArgumentNullException(nameof(xmlElement));
+            }
 
             if (cert == null)
             {
@@ -225,7 +272,7 @@ namespace Sustainsys.Saml2
 			signedXml.SigningKey = EnvironmentHelpers.IsNetCore ? cert.PrivateKey :
 				((RSACryptoServiceProvider)cert.PrivateKey)
 				.GetSha256EnabledRSACryptoServiceProvider();
-            signedXml.SignedInfo.CanonicalizationMethod = SignedXml.XmlDsigExcC14NTransformUrl;
+            signedXml.SignedInfo.CanonicalizationMethod = canonicalizationMethod;
             signedXml.SignedInfo.SignatureMethod = signingAlgorithm;
 
 			// We need a document unique ID on the element to sign it -- make one up if it's missing
