@@ -13,10 +13,6 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <DocumentationFile>C:\git\Sustainsys.Saml2\Sustainsys.Saml2.AspNetCore2\bin\Sustainsys.Saml2.AspNetCore2.xml</DocumentationFile>
-  </PropertyGroup>
-
-  <PropertyGroup>
     <Authors>Sustainsys</Authors>
   </PropertyGroup>
 

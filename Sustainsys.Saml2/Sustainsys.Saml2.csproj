@@ -17,10 +17,6 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <DocumentationFile>C:\git\Sustainsys.Saml2\Sustainsys.Saml2\bin\Sustainsys.Saml2.xml</DocumentationFile>
-  </PropertyGroup>
-
-  <PropertyGroup>
     <NoWarn>1701;1702;1591</NoWarn>
     <Authors>Sustainsys</Authors>
   </PropertyGroup>
@@ -38,7 +34,7 @@
     <Reference Include="System.Runtime.Caching" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net461'">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
 
@@ -47,7 +43,7 @@
     <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="5.2.4" />
     <PackageReference Include="Microsoft.IdentityModel.Tokens.Saml" Version="5.2.4" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.4.1" />
-    <PackageReference Include="System.Security.Cryptography.Xml" Version="4.5.0" />
+    <PackageReference Include="System.Security.Cryptography.Xml" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>

@@ -245,25 +245,25 @@ namespace Sustainsys.Saml2.Tests
         {
             var xml = "<xml ID=\"myxml\" />";
 
-            var xmlDoc = XmlHelpers.XmlDocumentFromString( xml );
+            var xmlDoc = XmlHelpers.XmlDocumentFromString(xml);
 
-            var signedXml = new SignedXml( xmlDoc );
+            var signedXml = new SignedXml(xmlDoc);
             signedXml.SigningKey = SignedXmlHelper.TestCert.PrivateKey;
             signedXml.SignedInfo.SignatureMethod = SignedXml.XmlDsigRSASHA1Url;
             signedXml.SignedInfo.CanonicalizationMethod = SignedXml.XmlDsigExcC14NTransformUrl;
 
             var ref1 = new Reference { Uri = "" };
-            ref1.AddTransform( new XmlDsigEnvelopedSignatureTransform() );
-            ref1.AddTransform( new XmlDsigExcC14NTransform() );
-            signedXml.AddReference( ref1 );
+            ref1.AddTransform(new XmlDsigEnvelopedSignatureTransform());
+            ref1.AddTransform(new XmlDsigExcC14NTransform());
+            signedXml.AddReference(ref1);
 
             signedXml.ComputeSignature();
-            xmlDoc.DocumentElement.AppendChild( xmlDoc.ImportNode( signedXml.GetXml(), true ) );
+            xmlDoc.DocumentElement.AppendChild(xmlDoc.ImportNode(signedXml.GetXml(), true));
 
             xmlDoc.DocumentElement.Invoking(
-                x => x.IsSignedBy( SignedXmlHelper.TestCert ) )
+                x => x.IsSignedBy(SignedXmlHelper.TestCert))
                 .Should().Throw<InvalidSignatureException>()
-                .And.Message.Should().Be( "Empty reference for Xml signature is not allowed." );
+                .And.Message.Should().Be("Empty reference for Xml signature is not allowed.");
         }
 
         [TestMethod]
@@ -348,7 +348,7 @@ namespace Sustainsys.Saml2.Tests
             var content1 = SignedXmlHelper.SignXml("<content ID=\"c1\" />");
             var content2 = SignedXmlHelper.SignXml("<content ID=\"c2\" />");
 
-            var xml = 
+            var xml =
 $@"<xml>
     {content1}
     {content2}
@@ -404,20 +404,18 @@ $@"<xml>
             {
                 Uri = "#MyXml",
                 DigestMethod = SecurityAlgorithms.Sha256Digest
-			};
+            };
             reference.AddTransform(new XmlDsigExcC14NTransform());
             reference.AddTransform(new XmlDsigEnvelopedSignatureTransform());
             sx.AddReference(reference);
-            sx.SigningKey = EnvironmentHelpers.IsNetCore ? SignedXmlHelper.TestCert.PrivateKey :
-				((RSACryptoServiceProvider)SignedXmlHelper.TestCert.PrivateKey)
-                .GetSha256EnabledRSACryptoServiceProvider();
+            sx.SigningKey = SignedXmlHelper.TestCert.PrivateKey.GetSha256EnabledAsymmetricAlgorithm();
 
             sx.SignedInfo.SignatureMethod = SignedXml.XmlDsigRSASHA1Url;
             sx.ComputeSignature();
             xmlDoc.DocumentElement.AppendChild(sx.GetXml());
 
             var keyClause = new X509RawDataKeyIdentifierClause(SignedXmlHelper.TestCert);
-            
+
             xmlDoc.DocumentElement.Invoking(x =>
             x.IsSignedByAny(Enumerable.Repeat(keyClause, 1), false, SecurityAlgorithms.RsaSha256Signature))
             .Should().Throw<InvalidSignatureException>()
@@ -440,9 +438,7 @@ $@"<xml>
             reference.AddTransform(new XmlDsigExcC14NTransform());
             reference.AddTransform(new XmlDsigEnvelopedSignatureTransform());
             sx.AddReference(reference);
-            sx.SigningKey = EnvironmentHelpers.IsNetCore ? SignedXmlHelper.TestCert.PrivateKey :
-				((RSACryptoServiceProvider)SignedXmlHelper.TestCert.PrivateKey)
-                .GetSha256EnabledRSACryptoServiceProvider();
+            sx.SigningKey = SignedXmlHelper.TestCert.PrivateKey.GetSha256EnabledAsymmetricAlgorithm();
 
             sx.SignedInfo.SignatureMethod = SecurityAlgorithms.RsaSha256Signature;
             sx.ComputeSignature();
@@ -656,9 +652,13 @@ $@"<xml>
         {
             var actual = XmlHelpers.CreateSafeXmlDocument();
 
-			string fieldName = (EnvironmentHelpers.IsNetCore ? "_": "") +"resolver";
-            typeof(XmlDocument).GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance)
-                .GetValue(actual).Should().BeNull();
+            var field = typeof(XmlDocument).GetField("_resolver", BindingFlags.NonPublic | BindingFlags.Instance);
+            if (field == null)
+            {
+                field = typeof(XmlDocument).GetField("resolver", BindingFlags.NonPublic | BindingFlags.Instance);
+            }
+
+            field.GetValue(actual).Should().BeNull();
 
             actual.PreserveWhitespace.Should().BeTrue();
         }

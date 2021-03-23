@@ -151,9 +151,12 @@ namespace Sustainsys.Saml2.Internal
             return xmlDoc.DocumentElement;
         }
 
-        internal static RSACryptoServiceProvider GetSha256EnabledRSACryptoServiceProvider(
-            this RSACryptoServiceProvider original)
+        internal static AsymmetricAlgorithm GetSha256EnabledAsymmetricAlgorithm(
+            this AsymmetricAlgorithm original)
         {
+#if NETSTANDARD2_0
+            return original;
+#else
             // The provider is probably using the default ProviderType. That's
             // a problem, because it doesn't support SHA256. Let's do some
             // black magic and create a new provider of a type that supports
@@ -163,15 +166,17 @@ namespace Sustainsys.Saml2.Internal
             // a known algorithm, so users kind of expect this to be handled
             // for them magically.
 
+            var provider = (RSACryptoServiceProvider)original;
             var cspParams = new CspParameters();
             cspParams.ProviderType = 24; //PROV_RSA_AES
-            cspParams.KeyContainerName = original.CspKeyContainerInfo.KeyContainerName;
-            cspParams.KeyNumber = (int)original.CspKeyContainerInfo.KeyNumber;
-            SetMachineKeyFlag(original, cspParams);
+            cspParams.KeyContainerName = provider.CspKeyContainerInfo.KeyContainerName;
+            cspParams.KeyNumber = (int)provider.CspKeyContainerInfo.KeyNumber;
+            SetMachineKeyFlag(provider, cspParams);
 
             cspParams.Flags |= CspProviderFlags.UseExistingKey;
 
             return new RSACryptoServiceProvider(cspParams);
+#endif
         }
 
         // We don't want to use Machine Key store during tests, so let's

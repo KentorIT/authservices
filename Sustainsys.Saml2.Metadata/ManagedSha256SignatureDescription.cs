@@ -53,9 +53,7 @@ namespace Sustainsys.Saml2.Metadata
                 throw new ArgumentNullException(nameof(key));
             }
 
-            var provider = EnvironmentHelpers.IsNetCore ? key :
-                ((RSACryptoServiceProvider)key)
-                    .GetSha256EnabledRSACryptoServiceProvider();
+            var provider = key.GetSha256EnabledAsymmetricAlgorithm();
 
             var formatter = new RSAPKCS1SignatureFormatter(provider);
             formatter.SetHashAlgorithm(HashAlgorithm);

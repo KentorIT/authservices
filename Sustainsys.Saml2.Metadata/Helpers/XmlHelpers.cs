@@ -224,9 +224,7 @@ namespace Sustainsys.Saml2.Metadata.Helpers
             // For both, the ID/Reference and the Transform/Canonicalization see as well:
             // https://www.oasis-open.org/committees/download.php/35711/sstc-saml-core-errata-2.0-wd-06-diff.pdf section 5.4.2 and 5.4.3
 
-            signedXml.SigningKey = EnvironmentHelpers.IsNetCore ? cert.PrivateKey :
-                ((RSACryptoServiceProvider)cert.PrivateKey)
-                .GetSha256EnabledRSACryptoServiceProvider();
+            signedXml.SigningKey = cert.PrivateKey.GetSha256EnabledAsymmetricAlgorithm();
             signedXml.SignedInfo.CanonicalizationMethod = SignedXml.XmlDsigExcC14NTransformUrl;
             signedXml.SignedInfo.SignatureMethod = signingAlgorithm;
 
@@ -519,24 +517,11 @@ namespace Sustainsys.Saml2.Metadata.Helpers
         /// later version.
         /// </summary>
         private static string[] GetKnownSigningAlgorithms()
-        {
-            // The newer algorithms names are marked internal in .NET Core
-            // https://github.com/dotnet/corefx/issues/25123
-            if (EnvironmentHelpers.IsNetCore)
-            {
-                return new string[] {
-                    "http://www.w3.org/2000/09/xmldsig#rsa-sha1",
-                    "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",
-                    "http://www.w3.org/2001/04/xmldsig-more#rsa-sha384",
-                    "http://www.w3.org/2001/04/xmldsig-more#rsa-sha512",
-                };
-            }
-            return typeof(SignedXml).GetFields()
+            => typeof(SignedXml).GetFields()
                 .Where(f => f.Name.StartsWith("XmlDsigRSASHA", StringComparison.Ordinal))
                 .Select(f => (string)f.GetRawConstantValue())
                 .OrderBy(f => f)
                 .ToArray();
-        }
 
         internal static readonly string[] KnownSigningAlgorithms =
             GetKnownSigningAlgorithms();
@@ -555,8 +540,7 @@ namespace Sustainsys.Saml2.Metadata.Helpers
         internal static string GetDefaultSigningAlgorithmName()
         {
             var rsaSha256Name = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256";
-            if (EnvironmentHelpers.IsNetCore ||
-                KnownSigningAlgorithms.Contains(rsaSha256Name))
+            if (KnownSigningAlgorithms.Contains(rsaSha256Name))
             {
                 return rsaSha256Name;
             }
@@ -564,22 +548,11 @@ namespace Sustainsys.Saml2.Metadata.Helpers
         }
 
         private static string[] GetKnownDigestAlgorithms()
-        {
-            if (EnvironmentHelpers.IsNetCore)
-            {
-                return new string[] {
-                    "http://www.w3.org/2000/09/xmldsig#sha1",
-                    "http://www.w3.org/2001/04/xmlenc#sha256",
-                    "http://www.w3.org/2001/04/xmldsig-more#sha384",
-                    "http://www.w3.org/2001/04/xmlenc#sha512"
-                };
-            }
-            return typeof(SignedXml).GetFields()
+            => typeof(SignedXml).GetFields()
                 .Where(f => f.Name.StartsWith("XmlDsigSHA", StringComparison.Ordinal))
                 .Select(f => (string)f.GetRawConstantValue())
                 .OrderBy(f => f)
                 .ToArray();
-        }
 
         internal static readonly string[] DigestAlgorithms = GetKnownDigestAlgorithms();
 
