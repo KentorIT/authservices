@@ -281,15 +281,13 @@ gosrSG6sO3IPeL4BncKqqZO2FokfZbaqPBv6xmoKsVTUTQRfNEks84dRiG0MjqBncR+B6CIrCv2a
         [TestMethod]
         public void ExtendedMetadataSerializer_Read_ServiceProviderSingleSignOnDescriptor()
         {
-			// TODO: I don't understand what this test was doing originally -- it was checking that there 
-			// were zero AssertionConsumerServices results from adding two with identical indexes (
-			// which is illegal as far as I can tell from the specification)
+			// This test is dealing with the issue of SPs having duplicate index numbers on their AssertionConsumerServices
             var data =
 @"<md:EntityDescriptor xmlns:md=""urn:oasis:names:tc:SAML:2.0:metadata"" entityID=""http://idp-acc.test.ek.sll.se/neas"">
     <md:SPSSODescriptor AuthnRequestsSigned=""false"" WantAssertionsSigned=""true"" protocolSupportEnumeration=""urn:oasis:names:tc:SAML:2.0:protocol"">
       <md:SingleLogoutService Binding=""urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"" Location=""https://maggie.bif.ost.se:9443/sp/saml/slo/HTTP-POST""/>
       <md:AssertionConsumerService Binding=""urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"" Location=""https://maggie.bif.ost.se:9443/sp/saml/sso/HTTP-POST"" index=""1"" isDefault=""true""/>
-      <md:AssertionConsumerService Binding=""urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"" Location=""https://maggie.bif.ost.se:9443/sp/saml/sso/POST"" index=""2"" isDefault=""true""/>
+      <md:AssertionConsumerService Binding=""urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"" Location=""https://maggie.bif.ost.se:9443/sp/saml/sso/POST"" index=""1"" isDefault=""true""/>
 	</md:SPSSODescriptor>
  </md:EntityDescriptor>";
 
@@ -298,7 +296,7 @@ gosrSG6sO3IPeL4BncKqqZO2FokfZbaqPBv6xmoKsVTUTQRfNEks84dRiG0MjqBncR+B6CIrCv2a
 
             var spssoInfo = entityDescriptor.RoleDescriptors.Cast<SpSsoDescriptor>().Single();
 
-            spssoInfo.AssertionConsumerServices.Count.Should().Be(2);
+            spssoInfo.AssertionConsumerServices.Count.Should().Be(0);
         }
 
         [TestMethod]

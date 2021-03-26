@@ -48,14 +48,14 @@ namespace Sustainsys.Saml2.Metadata.Serialization
             }
         }
 
-#if FALSE
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0")]
-        protected override ServiceProviderSingleSignOnDescriptor ReadServiceProviderSingleSignOnDescriptor(XmlReader reader)
+        protected override SpSsoDescriptor ReadSpSsoDescriptor(XmlReader reader)
         {
             reader.Skip();
-            return CreateServiceProviderSingleSignOnDescriptorInstance();
+            return CreateSpSsoDescriptorInstance();
         }
 
+#if FALSE
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", MessageId = "0")]
         protected override Organization ReadOrganization(XmlReader reader)
         {
