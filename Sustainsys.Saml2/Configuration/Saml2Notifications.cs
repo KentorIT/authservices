@@ -120,6 +120,15 @@ namespace Sustainsys.Saml2.Configuration
          = (cr, r) => { };
 
         /// <summary>
+        /// Notification called when the ACS command encounters an error while
+        /// processing the SAML response. Receives an exception and the
+        /// candidate redirect Url, return a non-null string if you need
+        /// to override the redirect per request.
+        /// </summary>
+        public Func<Exception, string, string> HandleAcsCommandError { get; set; }
+            = (ex, url) => null;
+
+        /// <summary>
         /// Notification called when the Logout command has produced a
         /// <see cref="CommandResult"/>, but before anything has been applied
         /// to the outgoing response. Set the <see cref="CommandResult.HandledResult"/>

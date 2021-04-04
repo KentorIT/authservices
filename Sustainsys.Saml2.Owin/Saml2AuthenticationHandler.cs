@@ -94,6 +94,9 @@ namespace Sustainsys.Saml2.Owin
             authProperties.RedirectUri = WebUtilities.AddQueryString(
                 authProperties.RedirectUri, "error", "access_denied");
 
+            authProperties.RedirectUri = Options.Notifications.HandleAcsCommandError(ex, authProperties.RedirectUri)
+                ?? authProperties.RedirectUri;
+
             string samlResponse = ex.Data.Contains("Saml2Response")
                 ? " The received SAML data is\n" + ex.Data["Saml2Response"]
                 : "";

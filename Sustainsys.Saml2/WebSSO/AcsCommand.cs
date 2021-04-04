@@ -44,6 +44,7 @@ namespace Sustainsys.Saml2.WebSso
             if (binding != null)
             {
                 UnbindResult unbindResult = null;
+                IdentityProvider idpContext = null;
                 try
                 {
                     unbindResult = binding.Unbind(request, options);
@@ -52,7 +53,7 @@ namespace Sustainsys.Saml2.WebSso
 
                     var samlResponse = new Saml2Response(unbindResult.Data, request.StoredRequestState?.MessageId, options);
                     
-                    var idpContext = GetIdpContext(unbindResult.Data, request, options);
+                    idpContext = GetIdpContext(unbindResult.Data, request, options);
 
                     var result = ProcessResponse(options, samlResponse, request.StoredRequestState, idpContext, unbindResult.RelayState);
 
@@ -90,6 +91,10 @@ namespace Sustainsys.Saml2.WebSso
                     {
                         // Add the payload to the existing exception
                         ex.Data["Saml2Response"] = unbindResult.Data.OuterXml;
+                    }
+                    if (idpContext != null)
+                    {
+                        ex.Data["Saml2IdP"] = idpContext.EntityId.Id;
                     }
                     throw;
                 }
