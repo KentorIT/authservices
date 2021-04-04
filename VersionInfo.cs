@@ -1,7 +1,7 @@
 using System.Reflection;
 
 [assembly: AssemblyCompany("Sustainsys")]
-[assembly: AssemblyCopyright("Copyright © Sustainsys and contributors 2013-2020")]
+[assembly: AssemblyCopyright("Copyright Â© Sustainsys and contributors 2013-2020")]
 
 
 // Sustainsys.Saml2 uses semantic versioning

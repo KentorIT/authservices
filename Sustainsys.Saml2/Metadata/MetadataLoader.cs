@@ -76,6 +76,83 @@ namespace Sustainsys.Saml2.Metadata
             return (EntityDescriptor)result;
         }
 
+
+        /// <summary>
+        /// Load and parse metadata directly from a byte array
+        /// </summary>
+        /// <param name="metadataBytes">byte array of metadata</param>
+        /// <returns>EntityDescriptor containing metadata</returns>
+        public static EntityDescriptor LoadIdpFromBytes(byte[] metadataBytes) => LoadIdpFromBytes(metadataBytes, false);
+
+        /// <summary>
+        /// Load and parse metadata directly from a byte array
+        /// </summary>
+        /// <param name="metadataBytes">byte array of metadata</param>
+        /// <param name="unpackEntitiesDescriptor">If the metadata contains
+        /// an EntitiesDescriptor, try to unpack it and return a single
+        /// EntityDescriptor inside if there is one.</param>
+        /// <returns>EntityDescriptor containing metadata</returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "EntityDescriptors")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "SPOptions")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "UnpackEntitiesDescriptorInIdentityProviderMetadata")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "EntitiesDescriptor")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "EntityDescriptor")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "IdentityProvider")]
+
+        public static EntityDescriptor LoadIdpFromBytes(byte[] metadataBytes, bool unpackEntitiesDescriptor)
+        {
+            if (metadataBytes == null)
+            {
+                throw new ArgumentNullException(nameof(metadataBytes));
+            }
+
+            var result = Load(metadataBytes, null, false, null);
+
+            var entitiesDescriptor = result as EntitiesDescriptor;
+            if (entitiesDescriptor != null)
+            {
+                if (unpackEntitiesDescriptor)
+                {
+                    if (entitiesDescriptor.ChildEntities.Count > 1)
+                    {
+                        throw new InvalidOperationException(LoadIdpUnpackingFoundMultipleEntityDescriptors);
+                    }
+
+                    return (EntityDescriptor)entitiesDescriptor.ChildEntities.Single();
+                }
+
+                throw new InvalidOperationException(LoadIdpFoundEntitiesDescriptor);
+            }
+
+            return (EntityDescriptor)result;
+        }
+
+        private static MetadataBase Load(
+            byte[] metadataBytes,
+            IEnumerable<SecurityKeyIdentifierClause> signingKeys,
+            bool validateCertificate,
+            string minIncomingSigningAlgorithm)
+        {
+            using (var ms = new MemoryStream(metadataBytes))
+            {
+                ms.Position = 0;
+                var reader = XmlDictionaryReader.CreateTextReader(
+                    ms,
+                    XmlDictionaryReaderQuotas.Max);
+
+                if (signingKeys != null)
+                {
+                    reader = ValidateSignature(
+                        reader,
+                        signingKeys,
+                        validateCertificate,
+                        minIncomingSigningAlgorithm);
+                }
+
+                return Load(reader);
+            }
+        }
+
         private static MetadataBase Load(
             string metadataLocation,
             IEnumerable<SecurityKeyIdentifierClause> signingKeys,

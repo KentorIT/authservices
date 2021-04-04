@@ -130,6 +130,20 @@ namespace Sustainsys.Saml2
             }
         }
 
+        private Func<byte[]> getMetadataBytesCallback;
+        public Func<byte[]> GetMetadataBytesCallback 
+        { 
+            get
+            {
+                return getMetadataBytesCallback; 
+            }
+            set 
+            {
+                getMetadataBytesCallback = value;
+                LoadMetadata = true;
+            } 
+        }
+
         private Saml2BindingType binding;
 
         /// <summary>
@@ -390,12 +404,22 @@ namespace Sustainsys.Saml2
                 {
                     try
                     {
-                        spOptions.Logger?.WriteInformation("Loading metadata for idp " + EntityId.Id);
-                        var metadata = MetadataLoader.LoadIdp(
-                            MetadataLocation,
-                            spOptions.Compatibility.UnpackEntitiesDescriptorInIdentityProviderMetadata);
-
-                        ReadMetadata(metadata);
+                        if (GetMetadataBytesCallback != null)
+                        {
+                            spOptions.Logger?.WriteInformation("Loading metadata from byte array for idp " + EntityId.Id);
+                            var metadata = MetadataLoader.LoadIdpFromBytes(
+                                GetMetadataBytesCallback(),
+                                spOptions.Compatibility.UnpackEntitiesDescriptorInIdentityProviderMetadata);
+                            ReadMetadata(metadata);
+                        }
+                        else
+                        {
+                            spOptions.Logger?.WriteInformation("Loading metadata for idp " + EntityId.Id);
+                            var metadata = MetadataLoader.LoadIdp(
+                                MetadataLocation,
+                                spOptions.Compatibility.UnpackEntitiesDescriptorInIdentityProviderMetadata);
+                            ReadMetadata(metadata);
+                        }
                     }
                     catch (WebException ex)
                     {
@@ -540,7 +564,10 @@ namespace Sustainsys.Saml2
             {
                 lock (metadataLoadLock)
                 {
-                    DoLoadMetadata();
+                    if (LoadMetadata && MetadataValidUntil.Value < DateTime.UtcNow)
+                    {
+                        DoLoadMetadata();
+                    }
                 }
             }
         }
