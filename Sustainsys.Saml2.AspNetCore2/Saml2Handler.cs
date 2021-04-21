@@ -117,7 +117,7 @@ namespace Sustainsys.Saml2.AspNetCore2
         /// <InheritDoc />
         public async Task<bool> HandleRequestAsync()
         {
-            if (context.Request.Path.StartsWithSegments(options.SPOptions.ModulePath, StringComparison.Ordinal))
+            if (context.Request.Path.StartsWithSegments(options.SPOptions.ModulePath, StringComparison.OrdinalIgnoreCase))
             {
                 var commandName = context.Request.Path.Value.Substring(
                     options.SPOptions.ModulePath.Length).TrimStart('/');

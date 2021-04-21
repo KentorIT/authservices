@@ -79,7 +79,7 @@ namespace Sustainsys.Saml2.AspNetCore2.Tests
                         };
 
                         idp.SigningKeys.AddConfiguredKey(SignedXmlHelper.TestCert);
-                        
+
                         opt.IdentityProviders.Add(idp);
                         opt.IdentityProviders.Add(secondIdp);
 
@@ -128,7 +128,7 @@ namespace Sustainsys.Saml2.AspNetCore2.Tests
             var cookieManager = Substitute.For<ICookieManager>();
             context.Subject.options.CookieManager = cookieManager;
 
-            var authProps = new AuthenticationProperties {RedirectUri = "https://sp.example.com/LoggedIn"};
+            var authProps = new AuthenticationProperties { RedirectUri = "https://sp.example.com/LoggedIn" };
 
             var response = context.HttpContext.Response;
 
@@ -139,9 +139,9 @@ namespace Sustainsys.Saml2.AspNetCore2.Tests
 
             cookieManager.Received().AppendResponseCookie(
                 Arg.Any<HttpContext>(),
-                Arg.Is<string>(value => value.StartsWith( "Saml2." )),
+                Arg.Is<string>(value => value.StartsWith("Saml2.")),
                 Arg.Any<string>(),
-                Arg.Is<CookieOptions>(c => c.HttpOnly && c.Path == "/" ));
+                Arg.Is<CookieOptions>(c => c.HttpOnly && c.Path == "/"));
         }
 
         [TestMethod]
@@ -230,12 +230,16 @@ namespace Sustainsys.Saml2.AspNetCore2.Tests
         }
 
         [TestMethod]
-        public async Task Saml2Handler_Acs_Works()
+        [DataRow("/Saml2/Acs")]
+        [DataRow("/SAML2/ACS")]
+        [DataRow("/saml2/acs")]
+        [DataRow("/SaMl2/AcS")]
+        public async Task Saml2Handler_Acs_Works(string acsPath)
         {
             var context = new Saml2HandlerTestContext();
 
             context.HttpContext.Request.Method = "POST";
-            context.HttpContext.Request.Path = "/Saml2/Acs";
+            context.HttpContext.Request.Path = acsPath;
 
             var authProps = new AuthenticationProperties()
             {
@@ -388,8 +392,8 @@ namespace Sustainsys.Saml2.AspNetCore2.Tests
                 "Content-Disposition",
                 "attachment; filename=\"sp.example.com_saml2.xml\"");
 
-			var ms = context.HttpContext.Response.Body.As<MemoryStream>();
-			Encoding.UTF8.GetString(ms.GetBuffer(), 0, (int)ms.Length)
+            var ms = context.HttpContext.Response.Body.As<MemoryStream>();
+            Encoding.UTF8.GetString(ms.GetBuffer(), 0, (int)ms.Length)
                 .Should().StartWith("<EntityDescriptor");
         }
 
@@ -456,7 +460,7 @@ namespace Sustainsys.Saml2.AspNetCore2.Tests
         public void Saml2Handler_SignOutAsync_NullcheckProperties()
         {
             var context = new Saml2HandlerTestContext();
-            
+
             Func<Task> f = async () => await context.Subject.SignOutAsync(null);
 
             f.Should().Throw<ArgumentNullException>().And.ParamName.Should().Be("properties");

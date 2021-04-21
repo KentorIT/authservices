@@ -1142,7 +1142,7 @@ namespace Sustainsys.Saml2.Tests.Saml2P
             Action a = () => Saml2Response.Read(signedResponse).GetClaims(options);
 
             a.Should().Throw<Saml2ResponseFailedValidationException>()
-                .WithMessage("Encrypted Assertion(s) could not be decrypted using the configured Service Certificate(s).");
+                .WithMessage("Encrypted Assertion(s) could not be decrypted using the configured Service Certificate(s)");
         }
 
         [TestMethod]

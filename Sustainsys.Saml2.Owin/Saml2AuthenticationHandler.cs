@@ -1,16 +1,14 @@
-﻿using Sustainsys.Saml2.Configuration;
-using Sustainsys.Saml2.Metadata;
-using Sustainsys.Saml2.WebSso;
+﻿using System;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using Microsoft.Owin;
 using Microsoft.Owin.Infrastructure;
 using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.Infrastructure;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
+using Sustainsys.Saml2.Metadata;
+using Sustainsys.Saml2.Owin.Extensions;
+using Sustainsys.Saml2.WebSso;
 
 namespace Sustainsys.Saml2.Owin
 {
@@ -197,7 +195,7 @@ namespace Sustainsys.Saml2.Owin
         {
             var Saml2Path = new PathString(Options.SPOptions.ModulePath);
 
-            if (Request.Path.StartsWithSegments(Saml2Path, out PathString remainingPath))
+            if (Request.Path.StartsWithSegments(Saml2Path, StringComparison.OrdinalIgnoreCase, out PathString remainingPath))
             {
                 if (remainingPath == new PathString("/" + CommandFactory.AcsCommandName))
                 {

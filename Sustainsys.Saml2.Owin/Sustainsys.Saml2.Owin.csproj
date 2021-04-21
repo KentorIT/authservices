@@ -65,6 +65,7 @@
     </Compile>
     <Compile Include="CommandResultExtensions.cs" />
     <Compile Include="Constants.cs" />
+    <Compile Include="Extensions\PathStringExtensions.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="OwinRequestExtensions.cs" />
     <Compile Include="Saml2AuthenticationExtensions.cs" />
