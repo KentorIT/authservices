@@ -80,7 +80,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "config-elements", "config-e
 		docs\config-elements\sustainsys-saml2.rst = docs\config-elements\sustainsys-saml2.rst
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sustainsys.Saml2.Metadata", "Sustainsys.Saml2.Metadata\Sustainsys.Saml2.Metadata.csproj", "{84CB2BF8-5EB7-4F82-951B-2ECA45CD0BE2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sustainsys.Saml2.Metadata", "Sustainsys.Saml2.Metadata\Sustainsys.Saml2.Metadata.csproj", "{84CB2BF8-5EB7-4F82-951B-2ECA45CD0BE2}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -144,6 +144,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{8EE1C45E-A81F-4D3F-A645-4C20528E327F} = {09639770-8C2B-4D30-BBFC-4F6DD1A92C89}
 		{CF1E517E-B2FE-48E1-8BB9-4D9981695C47} = {F3C8CC66-4CE9-4683-BC31-B89AF47A5897}
 		{8EB3820A-4DB4-4875-A155-6C3D7458983E} = {09639770-8C2B-4D30-BBFC-4F6DD1A92C89}
 		{20359A9A-6435-4264-8B36-22CD76731432} = {F3C8CC66-4CE9-4683-BC31-B89AF47A5897}

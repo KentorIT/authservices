@@ -4,6 +4,9 @@ using Sustainsys.Saml2.TestHelpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Xml;
+using System.Security.Cryptography.Xml;
+using System.Security.Cryptography;
+using NSubstitute.ExceptionExtensions;
 
 namespace Sustainsys.Saml2.Tests.Internal
 {
@@ -43,6 +46,25 @@ namespace Sustainsys.Saml2.Tests.Internal
                 e => e.Encrypt(false, null))
                 .Should().Throw<ArgumentNullException>()
                 .And.ParamName.Should().Be("certificate");
+        }
+
+        [TestMethod]
+        public void SymmetricFactory_SendAes256_AesInstanceReturned() 
+        {
+            var symetricInstance = CryptographyExtensions.SymmetricFactory(EncryptedXml.XmlEncAES256Url);
+            symetricInstance.Should().BeOfType(typeof(AesCryptoServiceProvider));
+        }
+
+        [TestMethod]
+        public void SymmetricFactory_SendTripleDES_TripleDESInstanceReturned() {
+            var symetricInstance = CryptographyExtensions.SymmetricFactory(EncryptedXml.XmlEncTripleDESUrl);
+            symetricInstance.Should().BeOfType(typeof(TripleDESCryptoServiceProvider));
+        }
+
+        [TestMethod]
+        public void SymmetricFactory_SendOtherAlgorithmNoFips_AesInstanceReturned() {
+            var symetricInstance = CryptographyExtensions.SymmetricFactory(EncryptedXml.XmlEncAES128Url);
+            symetricInstance.Should().BeOfType(typeof(AesCryptoServiceProvider));
         }
     }
 }

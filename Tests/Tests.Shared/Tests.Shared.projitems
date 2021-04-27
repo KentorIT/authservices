@@ -33,6 +33,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ExceptionTestHelpers.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ExtendedMetadataSerializerTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FederationTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Helpers\CryptographyHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Helpers\SpinWaiter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Helpers\StubServer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Helpers\XmlElementExtensions.cs" />
@@ -46,6 +47,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Internal\EnumeratorTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\PathHelperTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\QueryStringHelperTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Internal\RSAEncryptedXmlTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Internal\UriExtensionsTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Internal\XDocumentExtensionsTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ManagedSHA256SignatureDescriptionTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Metadata\ContactTypeHelpersTests.cs" />

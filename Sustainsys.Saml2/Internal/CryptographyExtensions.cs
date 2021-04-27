@@ -80,11 +80,10 @@ namespace Sustainsys.Saml2.Internal
 
             var encryptedXml = new EncryptedXml();
             byte[] encryptedElement;
-            using (var symmetricAlgorithm = new RijndaelManaged())
-            {
+
+            using (var symmetricAlgorithm = new AesCryptoServiceProvider()) {
                 X509SecurityKey x509SecurityKey = encryptingCredentials.Key as X509SecurityKey;
-                if (x509SecurityKey == null)
-                {
+                if (x509SecurityKey == null) {
                     throw new CryptographicException(
                         "The encrypting credentials have an unknown key of type {encryptingCredentials.Key.GetType()}");
                 }
@@ -119,8 +118,8 @@ namespace Sustainsys.Saml2.Internal
 
             var encryptedXml = new EncryptedXml();
             byte[] encryptedElement;
-            using (var symmetricAlgorithm = new RijndaelManaged())
-            {
+
+            using (var symmetricAlgorithm = new AesCryptoServiceProvider()) {
                 symmetricAlgorithm.KeySize = 256;
                 encryptedKey.CipherData = new CipherData(EncryptedXml.EncryptKey(symmetricAlgorithm.Key, (RSA)certificate.PublicKey.Key, useOaep));
                 encryptedElement = encryptedXml.EncryptData(elementToEncrypt, symmetricAlgorithm, false);
@@ -207,6 +206,17 @@ namespace Sustainsys.Saml2.Internal
                 throw new CryptographicException($"Unknown crypto algorithm '{name}'");
             }
             return Activator.CreateInstance(type, args);
+        }
+
+        internal static SymmetricAlgorithm SymmetricFactory(string type) {
+            switch (type) {
+                case EncryptedXml.XmlEncAES256Url:
+                    return new AesCryptoServiceProvider();
+                case EncryptedXml.XmlEncTripleDESUrl:
+                    return new TripleDESCryptoServiceProvider();
+                default:
+                    return new AesCryptoServiceProvider();
+            }
         }
     }
 }

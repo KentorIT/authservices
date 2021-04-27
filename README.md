@@ -19,3 +19,11 @@ There are three active branches in the repo
 
 ## Documentation
 Complete documentation is available at [our documentation site](https://saml2.sustainsys.com).
+
+##Fips Compliance
+The default encryption algorithm used is now AesCryptoServiceProvider, this is use in order to be fips compliant.
+If Key Algorithm is AES256 or TripleDES then the decryption will occur with an overrided GetDecryptionKey method from .Net
+The orverriden method should look at the encrpted key and use an AesCryptoServiceProvider or TripleDESCryptoProvider instance instead of using the base class CreateFromName method.
+AES256 or TripleDES were selected as the only 2 Fips compliance algorithms to be included for this validation following the following FIPS document.
+ https://csrc.nist.gov/csrc/media/publications/fips/140/2/final/documents/fips1402annexa.pdf
+If your Key algorithm is different from AES256 or TripleDES it simply will use the GetDecryptionKey base implementation for decryption.
