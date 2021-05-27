@@ -104,22 +104,25 @@ namespace Sustainsys.Saml2.Tests.WebSso
             var acsUrl = new Uri("http://localhost:73/MyApp/MyAcs");
             var signinUrl = new Uri("http://localhost:73/MyApp/MySignin");
             var appUrl = new Uri("http://localhost:73/MyApp");
+            var logoutUrl = new Uri("http://localhost:73/MyApp/MyLogout");
 
-            var subject = new Saml2Urls(acsUrl, signinUrl, appUrl);
+            var subject = new Saml2Urls(acsUrl, signinUrl, appUrl, logoutUrl);
 
             subject.AssertionConsumerServiceUrl.ToString().Should().Be(acsUrl.ToString());
             subject.SignInUrl.ToString().Should().Be(signinUrl.ToString());
             subject.ApplicationUrl.Should().Be(appUrl.ToString());
+            subject.LogoutUrl.Should().Be(logoutUrl.ToString());
         }
 
         [TestMethod]
         public void Saml2Urls_Ctor_AllowsNullAcs()
         {
             // AssertionConsumerServiceURL is optional in the SAML spec 
-            var subject = new Saml2Urls(null, new Uri("http://localhost/signin"), null);
+            var subject = new Saml2Urls(null, new Uri("http://localhost/signin"), null, new Uri("http://localhost/logout"));
 
             subject.AssertionConsumerServiceUrl.Should().Be(null);
             subject.SignInUrl.ToString().Should().Be("http://localhost/signin");
+            subject.LogoutUrl.ToString().Should().Be("http://localhost/logout");
         }
 
         [TestMethod]
@@ -128,7 +131,8 @@ namespace Sustainsys.Saml2.Tests.WebSso
             Action a = () => new Saml2Urls(
                 new Uri("http://localhost/signin"),
                 signInUrl: null,
-                applicationUrl: new Uri("http://localhost"));
+                applicationUrl: new Uri("http://localhost"),
+                logoutUrl: null);
 
             a.Should().Throw<ArgumentNullException>("signInUrl");
         }

@@ -75,16 +75,23 @@ namespace Sustainsys.Saml2.WebSso
         /// <param name="assertionConsumerServiceUrl">The full Url for the Assertion Consumer Service.</param>
         /// <param name="signInUrl">The full Url for sign-in.</param>
         /// <param name="applicationUrl">The full Url for the application root.</param>
-        public Saml2Urls(Uri assertionConsumerServiceUrl, Uri signInUrl, Uri applicationUrl)
+        /// <param name="logoutUrl">The full Url for logout</param>
+        public Saml2Urls(Uri assertionConsumerServiceUrl, Uri signInUrl, Uri applicationUrl, Uri logoutUrl)
         {
             if (signInUrl == null)
             {
                 throw new ArgumentNullException(nameof(signInUrl));
             }
 
+            if (logoutUrl == null)
+            {
+                throw new ArgumentNullException(nameof(logoutUrl));
+            }
+
             AssertionConsumerServiceUrl = assertionConsumerServiceUrl;
             SignInUrl = signInUrl;
             ApplicationUrl = applicationUrl;
+            LogoutUrl = logoutUrl;
         }
 
         void Init(Uri publicOrigin, string modulePath)
