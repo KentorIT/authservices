@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 using Sustainsys.Saml2.Tokens;
+using System.IO.Compression;
 
 namespace Sustainsys.Saml2.Metadata
 {
@@ -84,39 +85,71 @@ namespace Sustainsys.Saml2.Metadata
             bool validateCertificate,
             string minIncomingSigningAlgorithm)
         {
-            if(PathHelper.IsWebRootRelative(metadataLocation))
+            if (metadataLocation.Length < 400)
             {
-                metadataLocation = PathHelper.MapPath(metadataLocation);
-            }
-
-            using (var client = new WebClient())
-            using (var stream = client.OpenRead(metadataLocation))
-			using (var ms = new MemoryStream())
-			{
-				byte[] buf = new byte[65536];
-				for (; ;)
-				{
-					int read = stream.Read(buf, 0, buf.Length);
-					if (read == 0)
-						break;
-					ms.Write(buf, 0, read);
-				}
-				// System.Diagnostics.Debug.WriteLine(Encoding.UTF8.GetString(ms.ToArray()));
-				ms.Position = 0;
-                var reader = XmlDictionaryReader.CreateTextReader(
-                    ms,
-                    XmlDictionaryReaderQuotas.Max);
-
-                if(signingKeys != null)
+                if (PathHelper.IsWebRootRelative(metadataLocation))
                 {
-                    reader = ValidateSignature(
-                        reader,
-                        signingKeys,
-                        validateCertificate,
-                        minIncomingSigningAlgorithm);
+                    metadataLocation = PathHelper.MapPath(metadataLocation);
                 }
 
-                return Load(reader);
+                using (var client = new WebClient())
+                using (var stream = client.OpenRead(metadataLocation))
+                using (var ms = new MemoryStream())
+                {
+                    byte[] buf = new byte[65536];
+                    for (; ; )
+                    {
+                        int read = stream.Read(buf, 0, buf.Length);
+                        if (read == 0)
+                            break;
+                        ms.Write(buf, 0, read);
+                    }
+                    ms.Position = 0;
+                    var reader = XmlDictionaryReader.CreateTextReader(
+                        ms,
+                        XmlDictionaryReaderQuotas.Max);
+
+                    if (signingKeys != null)
+                    {
+                        reader = ValidateSignature(
+                            reader,
+                            signingKeys,
+                            validateCertificate,
+                            minIncomingSigningAlgorithm);
+                    }
+
+                    return Load(reader);
+                }
+            }
+            //Location length is greater than 400 therefore needs to be loaded as stream
+            byte[] gZipBuffer = Convert.FromBase64String(metadataLocation);
+            var buffer = new byte[1];
+            using (var memoryStream = new MemoryStream())
+            {
+
+                int dataLength = BitConverter.ToInt32(gZipBuffer, 0);
+                memoryStream.Write(gZipBuffer, 4, gZipBuffer.Length - 4);
+                buffer = new byte[dataLength];
+                memoryStream.Position = 0;
+                using (var gZipStream = new GZipStream(memoryStream, CompressionMode.Decompress))
+                {
+                    gZipStream.Read(buffer, 0, buffer.Length);
+                }
+
+                XmlDictionaryReader readerZipped = null;
+                using (readerZipped = XmlDictionaryReader.CreateTextReader(buffer, XmlDictionaryReaderQuotas.Max))
+                {
+                    if (signingKeys != null)
+                    {
+                        readerZipped = ValidateSignature(
+                            readerZipped,
+                            signingKeys,
+                            validateCertificate,
+                            minIncomingSigningAlgorithm);
+                    }
+
+                    return Load(readerZipped);
+                }
             }
         }
 
