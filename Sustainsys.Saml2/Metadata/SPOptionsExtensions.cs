@@ -12,7 +12,7 @@ using Sustainsys.Saml2.WebSso;
 
 namespace Sustainsys.Saml2.Metadata
 {
-    static class SPOptionsExtensions
+    public static class SPOptionsExtensions
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
         public static EntityDescriptor CreateMetadata(this SPOptions spOptions, Saml2Urls urls)
